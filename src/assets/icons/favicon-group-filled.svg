@@ -1,0 +1,9 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!-- Source: Mozilla Firefox toolkit/themes/shared/icons/folder.svg @ 023cb8315420edf23536fc0fde97d5717e72f5b1. Terminus adaptation: Firefox Nova geometry where available, outer contour only as a filled silhouette, and fixed mask paint. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="#000" fill-opacity="1">
+<g >
+  <path d="M5.309 1c.78 0 1.523.331 2.044.91l.983 1.092a54 54 0 0 1 4.441.21l.746.073.258.04A2.76 2.76 0 0 1 16 6.024v5.949c0 1.4-1.049 2.59-2.454 2.737a53.6 53.6 0 0 1-11.068.003A2.76 2.76 0 0 1 0 11.974V3.75A2.75 2.75 0 0 1 2.75 1z" />
+</g>
+</svg>

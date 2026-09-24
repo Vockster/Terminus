@@ -1,0 +1,7 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!-- Terminus original artwork: compact counter-clockwise Undo arrow. -->
+<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#000">
+  <path d="M6.28 1.97a.75.75 0 0 1 0 1.06L4.56 4.75h4.19a4.75 4.75 0 1 1 0 9.5H7.5a.75.75 0 0 1 0-1.5h1.25a3.25 3.25 0 1 0 0-6.5H4.56l1.72 1.72a.75.75 0 1 1-1.06 1.06l-3-3a.75.75 0 0 1 0-1.06l3-3a.75.75 0 0 1 1.06 0Z" />
+</svg>

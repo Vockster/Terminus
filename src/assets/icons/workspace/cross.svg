@@ -1,0 +1,12 @@
+<!--
+  Lucide Cross icon, user-supplied geometry.
+  Supplied/moved source SHA-256: 83dfcfea946f2b4b9ec3062506b1f1dc57217d08716eae137991393ae0b7423d
+  Geometry verified against Lucide commit 5d592a96aaeb4a3a09ffd8134f8f5ed878c9a0c5:
+  https://github.com/lucide-icons/lucide/blob/5d592a96aaeb4a3a09ffd8134f8f5ed878c9a0c5/icons/cross.svg
+
+  ISC License
+  Copyright (c) 2026 Lucide Icons and Contributors
+  Feather-derived icons: MIT License, Copyright (c) 2013-present Cole Bemis
+  Full license: ../LICENSE.lucide.txt
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h4a1 1 0 0 1 1 1v4a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-4a1 1 0 0 1 1-1h4a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-4a1 1 0 0 1-1-1V4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4a1 1 0 0 1-1 1z"/></svg>

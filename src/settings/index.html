@@ -1,0 +1,1284 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Terminus Settings</title>
+    <link rel="icon" href="../assets/icons/app.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="settings-layout">
+      <aside class="settings-navigation" aria-label="Settings navigation">
+        <div class="settings-brand">
+          <img src="../assets/icons/app.svg" alt="" />
+          <span>Settings</span>
+        </div>
+
+        <label class="mobile-navigation" for="settings-section">
+          <span>Settings section</span>
+          <select id="settings-section">
+            <option value="sidebar">Sidebar</option>
+            <option value="appearance">Appearance</option>
+            <option value="workspaces">Workspaces</option>
+            <option id="snapshots-mobile-label" value="snapshots">Snapshots</option>
+            <option id="snapshot-viewer-mobile-label" value="snapshot-viewer">Snapshot Viewer</option>
+            <option value="privacy">Privacy Settings</option>
+            <option value="storage">Storage</option>
+            <option value="firefox-styling">Optional Firefox Styling</option>
+            <option value="overview">Overview</option>
+          </select>
+        </label>
+
+        <nav class="desktop-navigation" aria-label="Settings sections">
+          <button class="navigation-item" type="button" data-panel="sidebar" aria-controls="sidebar-panel">
+            <span class="navigation-icon navigation-icon--sidebar" aria-hidden="true"></span>
+            <span>Sidebar</span>
+          </button>
+          <button class="navigation-item" type="button" data-panel="appearance" aria-controls="appearance-panel">
+            <span class="navigation-icon navigation-icon--appearance" aria-hidden="true"></span>
+            <span>Appearance</span>
+          </button>
+          <button class="navigation-item" type="button" data-panel="workspaces" aria-controls="workspaces-panel">
+            <span class="navigation-icon navigation-icon--workspaces" aria-hidden="true"></span>
+            <span>Workspaces</span>
+          </button>
+          <button class="navigation-item" type="button" data-panel="snapshots" aria-controls="snapshots-panel">
+            <span class="navigation-icon navigation-icon--snapshots" aria-hidden="true"></span>
+            <span id="snapshots-navigation-label">Snapshots</span>
+          </button>
+          <button class="navigation-item" type="button" data-panel="snapshot-viewer" aria-controls="snapshot-viewer-panel">
+            <span class="navigation-icon navigation-icon--snapshot-viewer" aria-hidden="true"></span>
+            <span id="snapshot-viewer-navigation-label">Snapshot Viewer</span>
+          </button>
+          <button class="navigation-item" type="button" data-panel="privacy" aria-controls="privacy-panel">
+            <span class="navigation-icon navigation-icon--privacy" aria-hidden="true"></span>
+            <span>Privacy Settings</span>
+          </button>
+          <button class="navigation-item" type="button" data-panel="storage" aria-controls="storage-panel">
+            <span class="navigation-icon navigation-icon--storage" aria-hidden="true"></span>
+            <span>Storage</span>
+          </button>
+          <button class="navigation-item" type="button" data-panel="firefox-styling" aria-controls="firefox-styling-panel">
+            <span class="navigation-icon navigation-icon--firefox-styling" aria-hidden="true"></span>
+            <span>Optional Firefox Styling</span>
+          </button>
+          <button class="navigation-item" type="button" data-panel="overview" aria-controls="overview-panel">
+            <span class="navigation-icon navigation-icon--overview" aria-hidden="true"></span>
+            <span>Overview</span>
+          </button>
+        </nav>
+
+        <button id="reset-all-settings" class="navigation-reset btn" type="button">
+          Restore all defaults
+        </button>
+      </aside>
+
+      <main class="settings-content">
+        <section id="sidebar-panel" class="settings-panel" data-panel-content="sidebar" aria-labelledby="sidebar-heading">
+          <header class="panel-header">
+            <p class="eyebrow">Terminus</p>
+            <h1 id="sidebar-heading">Sidebar</h1>
+            <p>Set the size of everything in the sidebar and which controls it shows.</p>
+          </header>
+
+          <section class="settings-card settings-card--lifted" aria-labelledby="workspace-size-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Size</p>
+              <h2 id="workspace-size-heading"><span class="card-icon card-icon--workspaces" aria-hidden="true"></span>Workspace icons</h2>
+            </div>
+            <fieldset class="size-selector" aria-labelledby="workspace-size-heading">
+              <legend class="visually-hidden">Workspace icons</legend>
+              <div class="size-choice-grid">
+                <label class="size-choice" data-size="small">
+                  <input type="radio" name="workspaceSize" value="small" aria-label="Small" />
+                  <span class="size-preview size-preview--workspace" aria-hidden="true"><i></i></span>
+                  <span class="size-choice-label"><strong><span class="tile-dot" aria-hidden="true"></span>Small</strong><small>16px</small></span>
+                </label>
+                <label class="size-choice" data-size="medium">
+                  <input type="radio" name="workspaceSize" value="medium" aria-label="Medium" />
+                  <span class="size-preview size-preview--workspace" aria-hidden="true"><i></i></span>
+                  <span class="size-choice-label"><strong><span class="tile-dot" aria-hidden="true"></span>Medium</strong><small>20px</small></span>
+                </label>
+                <label class="size-choice" data-size="large">
+                  <input type="radio" name="workspaceSize" value="large" aria-label="Large" />
+                  <span class="size-preview size-preview--workspace" aria-hidden="true"><i></i></span>
+                  <span class="size-choice-label"><strong><span class="tile-dot" aria-hidden="true"></span>Large</strong><small>28px</small></span>
+                </label>
+                <label class="size-choice" data-size="massive">
+                  <input type="radio" name="workspaceSize" value="massive" aria-label="Extra large" />
+                  <span class="size-preview size-preview--workspace" aria-hidden="true"><i></i></span>
+                  <span class="size-choice-label"><strong><span class="tile-dot" aria-hidden="true"></span>Extra large</strong><small>40px</small></span>
+                </label>
+              </div>
+            </fieldset>
+          </section>
+
+          <section class="settings-card" aria-labelledby="tab-size-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Size</p>
+              <h2 id="tab-size-heading">Tab icons</h2>
+            </div>
+            <fieldset class="size-selector" aria-labelledby="tab-size-heading">
+              <legend class="visually-hidden">Tab icons</legend>
+              <div class="size-choice-grid">
+                <label class="size-choice" data-size="small">
+                  <input type="radio" name="tabSize" value="small" aria-label="Small" />
+                  <span class="size-preview size-preview--tab" aria-hidden="true"><i>A</i></span>
+                  <span class="size-choice-label"><strong><span class="tile-dot" aria-hidden="true"></span>Small</strong><small>16px</small></span>
+                </label>
+                <label class="size-choice" data-size="medium">
+                  <input type="radio" name="tabSize" value="medium" aria-label="Medium" />
+                  <span class="size-preview size-preview--tab" aria-hidden="true"><i>A</i></span>
+                  <span class="size-choice-label"><strong><span class="tile-dot" aria-hidden="true"></span>Medium</strong><small>20px</small></span>
+                </label>
+                <label class="size-choice" data-size="large">
+                  <input type="radio" name="tabSize" value="large" aria-label="Large" />
+                  <span class="size-preview size-preview--tab" aria-hidden="true"><i>A</i></span>
+                  <span class="size-choice-label"><strong><span class="tile-dot" aria-hidden="true"></span>Large</strong><small>28px</small></span>
+                </label>
+                <label class="size-choice" data-size="massive">
+                  <input type="radio" name="tabSize" value="massive" aria-label="Extra large" />
+                  <span class="size-preview size-preview--tab" aria-hidden="true"><i>A</i></span>
+                  <span class="size-choice-label"><strong><span class="tile-dot" aria-hidden="true"></span>Extra large</strong><small>40px</small></span>
+                </label>
+              </div>
+            </fieldset>
+          </section>
+
+          <section class="settings-card" aria-labelledby="content-mode-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Layout</p>
+              <h2 id="content-mode-heading">Sidebar content</h2>
+            </div>
+            <fieldset class="appearance-modes embedded-choice-group" aria-labelledby="content-mode-heading">
+              <legend class="visually-hidden">Sidebar content</legend>
+              <div class="tiles">
+                <label class="choice-row content-mode-choice tile">
+                  <input type="radio" name="content-mode" value="full" />
+                  <span class="content-mode-copy"><strong><span class="tile-dot" aria-hidden="true"></span>Full labels</strong><small>Show names and status text.</small></span>
+                  <span class="content-mode-preview content-mode-preview--full" aria-hidden="true">
+                    <i></i><b></b><i></i><b></b><i></i><b></b>
+                  </span>
+                </label>
+                <label class="choice-row content-mode-choice tile">
+                  <input type="radio" name="content-mode" value="icons" />
+                  <span class="content-mode-copy"><strong><span class="tile-dot" aria-hidden="true"></span>Icons only</strong><small>Use a thinner sidebar without labels.</small></span>
+                  <span class="content-mode-preview content-mode-preview--icons" aria-hidden="true">
+                    <i></i><i></i><i></i>
+                  </span>
+                </label>
+              </div>
+            </fieldset>
+          </section>
+
+          <section class="settings-card" aria-labelledby="rail-controls-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Controls</p>
+              <h2 id="rail-controls-heading">What the rail shows</h2>
+            </div>
+            <div class="setting-rows">
+              <label class="setting-row setting-row--toggle" for="workspace-reordering-locked">
+                <span class="setting-copy">
+                  <strong>Lock workspace order</strong>
+                  <span>Prevents the rail from being rearranged by accident.</span>
+                </span>
+                <input
+                  id="workspace-reordering-locked"
+                  name="workspaceReorderingLocked"
+                  type="checkbox"
+                />
+              </label>
+
+              <label class="setting-row setting-row--toggle" for="show-add-workspace-button">
+                <span class="setting-copy">
+                  <strong>Show add workspace button</strong>
+                  <span>The + after the last rail entry.</span>
+                </span>
+                <input
+                  id="show-add-workspace-button"
+                  name="showAddWorkspaceButton"
+                  type="checkbox"
+                />
+              </label>
+
+              <label class="setting-row setting-row--toggle" for="show-action-buttons">
+                <span class="setting-copy">
+                  <strong>Show action buttons on rows</strong>
+                  <span>Right-click still shows every action.</span>
+                </span>
+                <input
+                  id="show-action-buttons"
+                  name="showActionButtons"
+                  type="checkbox"
+                />
+              </label>
+            </div>
+          </section>
+
+          <section class="settings-card" aria-labelledby="tab-controls-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Controls</p>
+              <h2 id="tab-controls-heading">Tabs and search</h2>
+            </div>
+            <div class="setting-rows">
+              <label class="setting-row setting-row--toggle" for="hide-unloaded-tabs-from-firefox">
+                <span class="setting-copy">
+                  <strong>Hide unloaded tabs from Firefox's tab strip</strong>
+                  <span>Terminus still keeps them. Active, pinned, sharing, and split tabs always remain visible.</span>
+                </span>
+                <input
+                  id="hide-unloaded-tabs-from-firefox"
+                  name="hideUnloadedTabsFromFirefox"
+                  type="checkbox"
+                />
+              </label>
+
+              <label class="setting-row setting-row--toggle" for="show-tab-search">
+                <span class="setting-copy">
+                  <strong>Show tab search</strong>
+                  <span>Searches titles first, then site names and paths.</span>
+                </span>
+                <input
+                  id="show-tab-search"
+                  name="showTabSearch"
+                  type="checkbox"
+                />
+              </label>
+              <label class="setting-row setting-row--select" for="tab-search-position">
+                <span class="setting-copy">
+                  <strong>Search position</strong>
+                  <span>Choose where the magnifier appears.</span>
+                </span>
+                <select id="tab-search-position" name="tabSearchPosition">
+                  <option value="top">Top</option>
+                  <option value="bottom">Bottom</option>
+                </select>
+              </label>
+
+              <label class="setting-row setting-row--toggle" for="settings-remember-last-panel">
+                <span class="setting-copy">
+                  <strong>Reopen the last Settings panel</strong>
+                  <span>This setting stays on this device.</span>
+                </span>
+                <input id="settings-remember-last-panel" type="checkbox" />
+              </label>
+            </div>
+            <div class="card-foot">
+              <button id="reset-sidebar" class="btn card-foot-push" type="button">Reset sidebar</button>
+            </div>
+          </section>
+        </section>
+
+        <section id="appearance-panel" class="settings-panel" data-panel-content="appearance" aria-labelledby="appearance-heading" hidden>
+          <header class="panel-header">
+            <p class="eyebrow">Terminus</p>
+            <h1 id="appearance-heading">Appearance</h1>
+            <p>Choose how the sidebar looks, and whether Settings follows it.</p>
+          </header>
+
+          <section class="settings-card settings-card--lifted" aria-labelledby="appearance-background-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Sidebar</p>
+              <h2 id="appearance-background-heading"><span class="card-icon card-icon--appearance" aria-hidden="true"></span>Background</h2>
+            </div>
+            <fieldset class="appearance-modes" aria-labelledby="appearance-background-heading">
+              <legend class="visually-hidden">Background</legend>
+              <div class="tiles">
+                <label class="choice-row tile">
+                  <input type="radio" name="appearance-mode" value="firefox" />
+                  <span class="tile-swatch" data-appearance-swatch="firefox" aria-hidden="true"></span>
+                  <span><strong><span class="tile-dot" aria-hidden="true"></span>Follow Firefox</strong><small>Matches your current theme.</small></span>
+                </label>
+                <label class="choice-row tile">
+                  <input type="radio" name="appearance-mode" value="default" />
+                  <span class="tile-swatch" data-appearance-swatch="default" aria-hidden="true"></span>
+                  <span><strong><span class="tile-dot" aria-hidden="true"></span>Firefox dark</strong><small>The fixed dark surface.</small></span>
+                </label>
+                <label class="choice-row tile">
+                  <input type="radio" name="appearance-mode" value="solid" />
+                  <span class="tile-swatch" data-appearance-swatch="solid" aria-hidden="true"></span>
+                  <span><strong><span class="tile-dot" aria-hidden="true"></span>Solid color</strong><small>One color you pick.</small></span>
+                </label>
+                <label class="choice-row tile">
+                  <input type="radio" name="appearance-mode" value="gradient" />
+                  <span class="tile-swatch" data-appearance-swatch="gradient" aria-hidden="true"></span>
+                  <span><strong><span class="tile-dot" aria-hidden="true"></span>Gradient</strong><small>Two to six stops.</small></span>
+                </label>
+              </div>
+            </fieldset>
+            <div id="solid-controls" class="swatch-row" hidden>
+              <span id="solid-color-swatch" class="swatch" aria-hidden="true"></span>
+              <input id="solid-color-hex" class="hex" type="text" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Sidebar color hex" />
+              <button id="solid-color" class="btn" type="button">Pick a color</button>
+            </div>
+            <div id="gradient-controls" class="gradient-controls" hidden>
+              <div class="angle-row">
+                <label for="gradient-angle">Angle</label>
+                <input id="gradient-angle" type="range" min="0" max="359" step="1" />
+                <output id="gradient-angle-output" class="angle-out" for="gradient-angle"></output>
+              </div>
+              <div id="gradient-rail" class="gradient-rail" role="group" aria-label="Gradient stops"></div>
+              <div id="gradient-selected-stop" class="swatch-row">
+                <span id="gradient-selected-swatch" class="swatch" aria-hidden="true"></span>
+                <input id="gradient-selected-hex" class="hex" type="text" value="#" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Selected stop hex" />
+                <button id="add-gradient-stop" class="btn" type="button">Add stop</button>
+                <button id="remove-gradient-stop" class="btn is-danger" type="button">Remove stop</button>
+              </div>
+              <p id="gradient-stop-note" class="settings-note"></p>
+            </div>
+            <figure id="appearance-preview" class="appearance-preview" aria-label="Preview of the sidebar">
+              <span class="appearance-preview-rail"><i class="is-active"></i><i></i><i></i></span>
+              <span class="appearance-preview-pane"><i class="is-current"></i><i></i><i class="is-short"></i><i></i><i class="is-short"></i></span>
+            </figure>
+          </section>
+
+          <section class="settings-card" aria-labelledby="appearance-highlight-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Sidebar</p>
+              <h2 id="appearance-highlight-heading">Current tab highlight</h2>
+              <p>Choose how the current tab is marked.</p>
+            </div>
+            <fieldset class="appearance-modes" aria-labelledby="appearance-highlight-heading">
+              <legend class="visually-hidden">Current tab highlight</legend>
+              <div class="tiles">
+                <label class="choice-row tile">
+                  <input type="radio" name="active-tab-highlight-mode" value="firefox" />
+                  <span><strong><span class="tile-dot" aria-hidden="true"></span>Follow Firefox</strong><small>Uses the theme's accent.</small></span>
+                </label>
+                <label class="choice-row tile">
+                  <input type="radio" name="active-tab-highlight-mode" value="custom" />
+                  <span><strong><span class="tile-dot" aria-hidden="true"></span>Custom color</strong><small>Pick your own.</small></span>
+                </label>
+              </div>
+            </fieldset>
+            <div id="active-tab-highlight-controls" class="swatch-row" hidden>
+              <span id="active-tab-highlight-swatch" class="swatch" aria-hidden="true"></span>
+              <input id="active-tab-highlight-color" class="hex" type="text" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Highlight color hex" />
+            </div>
+          </section>
+
+          <section class="settings-card" aria-labelledby="workspace-glow-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Containers</p>
+              <h2 id="workspace-glow-heading">Workspace glow</h2>
+              <p>Highlights workspaces whose default container is available.</p>
+            </div>
+            <fieldset id="workspace-glow-mode" class="appearance-modes" aria-labelledby="workspace-glow-heading">
+              <legend class="visually-hidden">Workspace glow</legend>
+              <div class="tiles">
+                <label class="choice-row tile">
+                  <input type="radio" name="workspace-glow-mode" value="container" />
+                  <span class="tile-swatch glow-swatch glow-swatch--container" aria-hidden="true"><i></i></span>
+                  <span><strong><span class="tile-dot" aria-hidden="true"></span>Container color</strong><small>The container's own color.</small></span>
+                </label>
+                <label class="choice-row tile">
+                  <input type="radio" name="workspace-glow-mode" value="workspace" />
+                  <span class="tile-swatch glow-swatch glow-swatch--workspace" aria-hidden="true"><i></i></span>
+                  <span><strong><span class="tile-dot" aria-hidden="true"></span>Workspace color</strong><small>The workspace's own color.</small></span>
+                </label>
+                <label class="choice-row tile">
+                  <input type="radio" name="workspace-glow-mode" value="off" />
+                  <span class="tile-swatch glow-swatch glow-swatch--off" aria-hidden="true"><i></i></span>
+                  <span><strong><span class="tile-dot" aria-hidden="true"></span>Off</strong><small>No glow.</small></span>
+                </label>
+              </div>
+            </fieldset>
+          </section>
+
+          <section class="settings-card" aria-labelledby="appearance-settings-page-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">This page</p>
+              <h2 id="appearance-settings-page-heading">Settings page</h2>
+              <p>Settings has its own surface unless you tell it to follow the sidebar.</p>
+            </div>
+            <div class="setting-rows settings-page-appearance">
+            <label class="setting-row setting-row--toggle" for="apply-theme-to-settings">
+              <span class="setting-copy">
+                <strong>Use the sidebar's styling here</strong>
+                <span>Applies your sidebar background to Settings.</span>
+              </span>
+              <input id="apply-theme-to-settings" type="checkbox" />
+            </label>
+            <div class="setting-row color-setting">
+              <div class="setting-copy">
+                <label for="settings-background-color">Settings background</label>
+                <p>Used when Settings keeps its own surface.</p>
+              </div>
+              <span class="swatch-row">
+                <span id="settings-background-swatch" class="swatch swatch--small" aria-hidden="true"></span>
+                <input id="settings-background-color" class="hex" type="text" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Settings background hex" />
+              </span>
+            </div>
+            </div>
+            <div class="card-foot">
+              <button id="reset-appearance" class="btn card-foot-push" type="button">Reset appearance</button>
+            </div>
+          </section>
+
+          <section class="settings-card" aria-labelledby="settings-font-size-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">This page</p>
+              <h2 id="settings-font-size-heading">Text size</h2>
+              <p id="settings-font-size-help">Affects Settings only. The sidebar has its own sizes.</p>
+            </div>
+            <fieldset class="size-selector settings-font-size-selector" aria-labelledby="settings-font-size-heading" aria-describedby="settings-font-size-help">
+              <legend class="visually-hidden">Text size</legend>
+              <div class="size-choice-grid settings-font-size-grid">
+                <label class="size-choice settings-font-size-choice" data-size="small">
+                  <input type="radio" name="settingsFontSize" value="16" aria-label="Small" />
+                  <span class="size-preview size-preview--font" aria-hidden="true"><i></i></span>
+                  <span class="size-choice-label"><strong><span class="tile-dot" aria-hidden="true"></span>Small</strong><small>16px</small></span>
+                </label>
+                <label class="size-choice settings-font-size-choice" data-size="medium">
+                  <input type="radio" name="settingsFontSize" value="20" aria-label="Medium" />
+                  <span class="size-preview size-preview--font" aria-hidden="true"><i></i></span>
+                  <span class="size-choice-label"><strong><span class="tile-dot" aria-hidden="true"></span>Medium</strong><small>20px</small></span>
+                </label>
+                <label class="size-choice settings-font-size-choice" data-size="large">
+                  <input type="radio" name="settingsFontSize" value="28" aria-label="Large" />
+                  <span class="size-preview size-preview--font" aria-hidden="true"><i></i></span>
+                  <span class="size-choice-label"><strong><span class="tile-dot" aria-hidden="true"></span>Large</strong><small>28px</small></span>
+                </label>
+              </div>
+            </fieldset>
+          </section>
+
+        </section>
+
+        <section id="workspaces-panel" class="settings-panel" data-panel-content="workspaces" aria-labelledby="workspaces-heading" hidden>
+          <header class="panel-header">
+            <p class="eyebrow">Terminus</p>
+            <h1 id="workspaces-heading">Workspaces</h1>
+            <p>Arrange the rail, then edit whatever you select. Removing a workspace never closes its tabs.</p>
+          </header>
+
+          <section id="container-support-card" class="settings-card container-support-card" aria-labelledby="container-support-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Optional</p>
+              <h2 id="container-support-heading">Firefox containers</h2>
+              <p id="container-support-description" class="container-support-copy">Use a default container for new tabs opened in that workspace. Not available in private windows.</p>
+            </div>
+            <p id="container-permission-disclosure" class="container-support-copy settings-note">Existing tabs keep their containers. Terminus never reads cookies.</p>
+            <p class="state-line"><span id="container-support-pill" class="state-pill">Off</span><span id="container-support-status" role="status" aria-live="polite"></span></p>
+            <div class="card-foot">
+              <button id="enable-container-support" class="btn is-primary" type="button">Enable containers</button>
+            </div>
+          </section>
+
+          <section id="custom-icon-card" class="settings-card custom-icon-card" aria-labelledby="custom-icon-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Optional</p>
+              <h2 id="custom-icon-heading">Custom icons</h2>
+              <p class="custom-icon-copy">Your pictures are kept as 128px copies on this computer and left out of backups.</p>
+            </div>
+            <input id="custom-icon-file" type="file" multiple hidden />
+            <p class="state-line"><span id="custom-icon-count" class="state-pill is-accent">0 of 100</span><span id="custom-icon-usage" class="state-when">Transparent backgrounds work best</span></p>
+            <ul id="custom-icon-library" class="custom-icon-library" aria-label="Your custom icons" hidden></ul>
+            <p id="custom-icon-status" class="setting-help" role="status" aria-live="polite" hidden></p>
+            <div class="card-foot">
+              <button id="add-custom-icons" class="btn is-primary" type="button">Add Icons</button>
+            </div>
+          </section>
+
+          <section id="workspace-rail-card" class="settings-card settings-card--lifted workspace-rail-card" aria-labelledby="workspace-rail-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Rail</p>
+              <h2 id="workspace-rail-heading"><span class="card-icon card-icon--workspaces" aria-hidden="true"></span>Workspace rail</h2>
+              <p>Click to select. Use Shift for a range or Ctrl to add. Alt+Up or Alt+Down reorders the whole selection.</p>
+            </div>
+
+            <div id="workspace-editor" class="workspace-editor">
+              <div class="rail-editor-pane rail-editor-preview-pane">
+                <div class="rail-editor-pane-heading">
+                  <h3>Order</h3>
+                  <p id="rail-selection-status" class="rail-selection-status" role="status" aria-live="polite">Nothing selected</p>
+                </div>
+                <div id="rail-preview" class="rail-preview" role="listbox" aria-multiselectable="true" aria-label="Workspace rail"></div>
+                <div class="rail-add-row" role="group" aria-label="Add to the rail">
+                  <button id="create-workspace" class="btn is-primary" type="button" aria-label="Create workspace">Workspace</button>
+                  <button id="add-divider" class="btn" type="button" aria-label="Add divider">Divider</button>
+                  <button id="add-space" class="btn" type="button" aria-label="Add space">Space</button>
+                </div>
+              </div>
+              <div id="rail-inspector" class="rail-editor-pane rail-inspector" aria-live="polite"></div>
+            </div>
+
+            <p id="workspace-removal-undo" class="state-line workspace-removal-undo" hidden>
+              <span class="state-pill is-accent">Removed</span>
+              <span id="workspace-removal-undo-text"></span>
+              <button id="workspace-removal-undo-button" class="btn" type="button">Undo</button>
+            </p>
+          </section>
+
+          <section id="workspace-package-card" class="settings-card workspace-package-card" aria-labelledby="workspace-package-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Workspace Export</p>
+              <h2 id="workspace-package-heading">Move this setup</h2>
+              <p>A ZIP file that allows you to move your workspaces with custom icons included. Great for sharing with friends or saving workspace layouts without including your tabs.</p>
+            </div>
+            <input id="workspace-package-file" type="file" accept=".zip,application/zip,.json,application/json" hidden />
+            <p id="workspace-package-status" class="setting-help" role="status" aria-live="polite" hidden></p>
+            <div class="card-foot">
+              <button id="export-workspace-package" class="btn is-primary" type="button">Export setup</button>
+              <button id="import-workspace-package" class="btn" type="button">Import setup</button>
+            </div>
+          </section>
+        </section>
+
+        <dialog id="create-container-dialog" class="settings-dialog" aria-labelledby="create-container-heading">
+          <form id="create-container-form" method="dialog">
+            <h2 id="create-container-heading">Create Firefox container</h2>
+            <label for="create-container-name">Name</label>
+            <input id="create-container-name" type="text" maxlength="80" required autocomplete="off" />
+            <span class="container-create-label">Color</span>
+            <button id="create-container-color" class="btn container-color-button" type="button" aria-haspopup="dialog">Choose color</button>
+            <fieldset class="container-icon-fieldset">
+              <legend id="create-container-firefox-icon-label" class="container-create-label">Firefox Icons</legend>
+              <div id="create-container-icon" class="container-icon-grid" role="radiogroup" aria-labelledby="create-container-firefox-icon-label"></div>
+            </fieldset>
+            <p id="create-container-status" class="setting-help" role="status" aria-live="polite" hidden></p>
+            <div class="dialog-actions">
+              <button class="btn" id="cancel-create-container" type="button">Cancel</button>
+              <button class="btn" id="submit-create-container" type="submit">Create container</button>
+            </div>
+          </form>
+        </dialog>
+
+        <dialog id="remove-custom-icon-dialog" class="settings-dialog" aria-labelledby="remove-custom-icon-heading">
+          <form id="remove-custom-icon-form" method="dialog">
+            <h2 id="remove-custom-icon-heading">Remove custom icon?</h2>
+            <p id="remove-custom-icon-details"></p>
+            <div class="dialog-actions">
+              <button class="btn" id="cancel-custom-icon-removal" type="button">Cancel</button>
+              <button id="confirm-custom-icon-removal" class="btn is-danger" type="submit">Remove</button>
+            </div>
+          </form>
+        </dialog>
+
+        <dialog id="workspace-package-dialog" class="settings-dialog" aria-labelledby="workspace-package-dialog-heading">
+          <form id="workspace-package-form" method="dialog">
+            <h2 id="workspace-package-dialog-heading">Import workspace setup</h2>
+            <p id="workspace-package-summary"></p>
+            <p id="workspace-package-damaged" class="setting-help" hidden></p>
+            <fieldset class="workspace-package-modes">
+              <legend>How should these workspaces arrive?</legend>
+              <label>
+                <input id="workspace-package-mode-add" type="radio" name="workspace-package-mode" value="add" checked />
+                Add them to my workspaces
+              </label>
+              <label>
+                <input id="workspace-package-mode-replace" type="radio" name="workspace-package-mode" value="replace" />
+                Use this setup and keep unmatched workspaces
+              </label>
+            </fieldset>
+            <div id="workspace-package-replace-confirmation" hidden>
+              <p id="workspace-package-replace-warning" class="setting-help"></p>
+              <label>
+                <input id="workspace-package-replace-acknowledged" type="checkbox" />
+                I understand matching current workspaces will be replaced
+              </label>
+            </div>
+            <div class="dialog-actions">
+              <button class="btn" id="cancel-workspace-package" type="button">Cancel</button>
+              <button class="btn" id="confirm-workspace-package" type="submit">Import</button>
+            </div>
+          </form>
+        </dialog>
+
+        <section id="snapshots-panel" class="settings-panel" data-panel-content="snapshots" aria-labelledby="snapshots-heading" hidden>
+          <header class="panel-header">
+            <p class="eyebrow">Terminus</p>
+            <h1 id="snapshots-heading">Snapshots</h1>
+            <p id="snapshots-description">Save your workspaces and tabs on a schedule, and control how many copies are kept.</p>
+          </header>
+
+          <section class="snapshot-section settings-card settings-card--lifted" aria-labelledby="automatic-snapshots-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Automatic</p>
+              <h2 id="automatic-snapshots-heading"><span class="card-icon card-icon--snapshots" aria-hidden="true"></span>Automatic backups</h2>
+            </div>
+
+            <div class="setting-rows">
+              <label class="setting-row setting-row--toggle" for="snapshots-automatic-enabled">
+                <span class="setting-copy">
+                  <strong id="snapshots-automatic-label">Automatic Sidebar Snapshots</strong>
+                  <span id="snapshots-automatic-description">Saves workspaces and tabs.</span>
+                </span>
+                <input id="snapshots-automatic-enabled" type="checkbox" />
+              </label>
+
+              <label class="setting-row setting-row--toggle" for="settings-backups-automatic-enabled">
+                <span class="setting-copy">
+                  <strong>Automatic Settings Backups</strong>
+                  <span>Saves your settings.</span>
+                </span>
+                <input id="settings-backups-automatic-enabled" type="checkbox" />
+              </label>
+
+              <div id="snapshots-test-setting" class="setting-row snapshot-test-setting">
+                <div class="setting-copy">
+                  <strong>Test automatic snapshots</strong>
+                  <p>Create a test snapshot after five seconds. This does not change the schedule.</p>
+                </div>
+                <button id="snapshots-test-automatic" class="btn" type="button">Start 5-second test</button>
+                <p id="snapshots-test-status" class="full-row setting-help" role="status" aria-live="polite">Turn on Automatic Sidebar Snapshots to run this test.</p>
+              </div>
+            </div>
+
+            <p class="state-line snapshot-status-line" aria-label="Snapshot status">
+              <span id="snapshots-schedule-pill" class="state-pill">Off</span>
+              <span><span class="state-when">Storage</span> <strong id="snapshots-storage-status">Checking…</strong></span>
+              <span><span class="state-when">Last save</span> <strong id="snapshots-last-save">Never</strong></span>
+              <span><span class="state-when">Next save</span> <strong id="snapshots-next-save">Not scheduled</strong></span>
+            </p>
+          </section>
+
+          <section class="snapshot-section settings-card" aria-labelledby="snapshot-schedule-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Timing</p>
+              <h2 id="snapshot-schedule-heading">Schedule and how many to keep</h2>
+            </div>
+
+            <div class="setting-rows">
+              <div id="snapshots-interval-setting" class="setting-row snapshot-inline-setting">
+                <div class="setting-copy">
+                  <label for="snapshots-interval-value">Save every</label>
+                  <p id="snapshots-interval-help">How often an automatic save runs.</p>
+                </div>
+                <div class="snapshot-input-pair">
+                  <input id="snapshots-interval-value" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" />
+                  <select id="snapshots-interval-unit" aria-label="Unit">
+                    <option value="seconds">seconds</option>
+                    <option value="minutes">minutes</option>
+                    <option value="hours">hours</option>
+                    <option value="days">days</option>
+                    <option value="weeks">weeks</option>
+                    <option value="years">years</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="setting-rows">
+              <div class="setting-row snapshot-inline-setting">
+                <div class="setting-copy">
+                  <label for="snapshots-retention-count">Automatic Saves</label>
+                  <p id="snapshots-retention-count-help">How many saves you can have before the oldest one is deleted.</p>
+                </div>
+                <input id="snapshots-retention-count" class="snapshot-count-input" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-describedby="snapshots-retention-count-help" />
+              </div>
+
+              <div class="setting-row snapshot-inline-setting">
+                <div class="setting-copy">
+                  <label for="snapshots-restore-batch-size">Tabs reloaded at a time</label>
+                  <p id="snapshots-restore-batch-size-help">Restore this many unloaded tabs at a time.</p>
+                </div>
+                <input id="snapshots-restore-batch-size" class="snapshot-count-input" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-describedby="snapshots-restore-batch-size-help" />
+              </div>
+
+              <p id="snapshots-cleanup-summary" class="full-row setting-help snapshot-cleanup-summary" role="status" aria-live="polite"></p>
+            </div>
+            <p class="settings-note">Lowering the limit previews what would be removed and asks before writing.</p>
+          </section>
+
+          <section id="settings-backups-section" class="settings-card snapshot-settings-backups" aria-labelledby="settings-backups-heading" tabindex="-1">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Preferences</p>
+              <h2 id="settings-backups-heading"><span class="card-icon card-icon--settings" aria-hidden="true"></span>Settings Backups</h2>
+              <p>Preferences only — no workspaces, containers, tabs or custom icons.</p>
+            </div>
+            <div class="settings-file-field">
+              <p class="settings-note">They stay on this device unless you export one.</p>
+              <div class="snapshot-action-grid card-foot" aria-label="Settings backup actions">
+                <button id="snapshots-save-settings" class="btn is-primary" type="button">Create settings backup</button>
+                <label class="snapshot-file-button btn" for="settings-backup-import-file">Import from file</label>
+                <input id="settings-backup-import-file" class="visually-hidden" type="file" accept="application/json,.json" />
+              </div>
+              <div id="settings-backup-import-preview" class="snapshot-import-preview" aria-live="polite"></div>
+            </div>
+            <div id="settings-backup-list" class="settings-backup-list" aria-live="polite">
+              <p class="snapshot-empty">No settings backups saved yet.</p>
+            </div>
+            <section class="snapshot-report settings-backup-report" aria-labelledby="settings-backup-report-heading">
+              <h3 id="settings-backup-report-heading">Last settings restore</h3>
+              <div id="settings-backup-restore-report" aria-live="polite">
+                <p class="snapshot-empty">No settings restore has run yet.</p>
+              </div>
+            </section>
+          </section>
+        </section>
+
+        <section id="snapshot-viewer-panel" class="settings-panel" data-panel-content="snapshot-viewer" aria-labelledby="snapshot-viewer-heading" hidden>
+          <header class="panel-header">
+            <p class="eyebrow">Terminus</p>
+            <h1 id="snapshot-viewer-heading">Snapshot Viewer</h1>
+            <p id="snapshot-viewer-description">Browse what you've saved and reopen any of it. Nothing here is restored until you choose it.</p>
+          </header>
+
+          <div class="snapshot-viewer">
+            <aside class="snapshot-viewer-sidebar" aria-label="Snapshots">
+              <button id="snapshots-create" class="btn is-primary" type="button">Create snapshot</button>
+              <div class="snapshot-import-pair">
+                <label class="snapshot-file-button btn" for="snapshots-import-file">Import file</label>
+                <button id="bookmark-import" class="bookmark-import-button btn" type="button" aria-label="Import Bookmarks">Bookmarks</button>
+              </div>
+              <input id="snapshots-import-file" class="visually-hidden" type="file" accept="application/json,.json" />
+              <p id="bookmark-import-private-note" class="bookmark-import-private-note" hidden>Bookmark import is available in normal windows.</p>
+              <input id="bookmark-import-file" class="visually-hidden" type="file" accept=".html,.htm,text/html" />
+              <div class="snapshot-list-head">
+                <span id="snapshots-count" class="snapshot-list-count">0 saved</span>
+                <button id="snapshots-refresh" class="icon-btn" type="button" aria-label="Refresh list" title="Refresh list"><span class="icon-btn-glyph" aria-hidden="true"></span></button>
+              </div>
+              <div class="snapshot-list-divider" aria-hidden="true"></div>
+              <div id="snapshots-list" class="snapshot-list" aria-live="polite"></div>
+              <div class="snapshot-list-foot">
+                <button id="snapshots-clear-viewer" class="quiet-danger" type="button">Clear viewer</button>
+              </div>
+            </aside>
+
+            <div class="snapshot-viewer-content">
+              <header class="snapshot-viewer-header">
+                <div>
+                  <h2 id="snapshot-viewer-title">Choose a snapshot</h2>
+                  <p id="snapshot-viewer-meta">Select a saved snapshot to view its tabs.</p>
+                </div>
+              </header>
+              <p id="bookmark-import-totals" class="bookmark-import-totals" role="status" aria-live="polite"></p>
+              <div id="snapshot-viewer-tree" class="snapshot-tree" aria-live="polite">
+                <p class="snapshot-empty">No snapshot selected.</p>
+              </div>
+              <footer class="snapshot-viewer-foot">
+                <div id="snapshot-viewer-actions" class="snapshot-viewer-actions" hidden>
+                  <button id="snapshots-open-all" class="btn snapshot-restore-button" type="button">Open all windows</button>
+                  <button id="snapshots-open-selected" class="btn snapshot-restore-button" type="button" disabled>Open selected tabs</button>
+                  <button id="snapshots-add-import" class="btn" type="button" hidden>Save imported snapshot</button>
+                  <button id="snapshots-export" class="btn snapshot-export-button card-foot-push" type="button">Export</button>
+                  <button id="snapshots-delete" class="btn is-danger" type="button">Delete</button>
+                </div>
+                <div id="bookmark-import-actions" class="snapshot-viewer-actions" hidden>
+                  <button id="bookmark-import-create" class="btn snapshot-restore-button bookmark-import-create" type="button"><span class="bookmark-import-workspace-icon" aria-hidden="true"></span>New Workspace</button>
+                  <button id="bookmark-import-cancel" class="btn" type="button">Cancel</button>
+                </div>
+              </footer>
+            </div>
+          </div>
+
+          <p id="snapshot-location-note" class="snapshot-location-note">Snapshots stay in this Firefox profile. Exported files hold tab addresses, titles and container names, never cookies or sign-ins.</p>
+          <p id="snapshot-viewer-status" class="snapshot-inline-status" role="status" aria-live="polite">Ready.</p>
+
+          <div class="snapshot-viewer-summary">
+            <section class="snapshot-report settings-card" aria-labelledby="snapshot-report-heading">
+              <p class="settings-card-kicker">History</p>
+              <h2 id="snapshot-report-heading">Last restore</h2>
+              <div id="snapshots-restore-report" aria-live="polite">
+                <p class="snapshot-empty">No snapshot has been opened yet.</p>
+              </div>
+            </section>
+
+            <section class="snapshot-report snapshot-automatic-status settings-card" aria-labelledby="snapshot-automatic-status-heading">
+              <p class="settings-card-kicker">Schedule</p>
+              <h2 id="snapshot-automatic-status-heading">Automatic snapshots</h2>
+              <dl>
+                <div>
+                  <dt>Last saved</dt>
+                  <dd id="snapshot-viewer-last-automatic-save">Never</dd>
+                </div>
+                <div>
+                  <dt>Next snapshot</dt>
+                  <dd id="snapshot-viewer-next-automatic-save">Not scheduled</dd>
+                </div>
+              </dl>
+            </section>
+          </div>
+
+        </section>
+
+        <section id="privacy-panel" class="settings-panel" data-panel-content="privacy" aria-labelledby="privacy-heading" hidden>
+          <header class="panel-header">
+            <p class="eyebrow">Terminus</p>
+            <h1 id="privacy-heading">Privacy Settings</h1>
+            <p>Private windows keep their own session. Their data stays on this computer unless you export it.</p>
+          </header>
+
+          <section class="privacy-access-card settings-card settings-card--lifted" aria-labelledby="private-access-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Access</p>
+              <h2 id="private-access-heading"><span class="card-icon card-icon--privacy" aria-hidden="true"></span>Private windows</h2>
+              <p>Firefox decides this, not Terminus. Change it in Add-ons Manager under Run in Private Windows.</p>
+            </div>
+            <p class="state-line">
+              <span id="private-access-status" class="state-pill">Checking…</span>
+              <span id="private-access-help">Checking whether Terminus runs in private windows.</span>
+            </p>
+          </section>
+
+          <section class="settings-card" aria-labelledby="private-recovery-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Recovery</p>
+              <h2 id="private-recovery-heading">Private tabs between sessions</h2>
+              <p>Off by default. When on, private tab addresses and titles are stored locally for crash recovery. Cookies and form data are never stored.</p>
+            </div>
+            <div class="setting-rows">
+              <label class="setting-row setting-row--toggle" for="private-keep-tabs">
+                <span class="setting-copy">
+                  <strong>Keep private tabs between sessions</strong>
+                  <span>Turning this off deletes saved recovery data after the last private window closes.</span>
+                </span>
+                <input id="private-keep-tabs" type="checkbox" />
+              </label>
+            </div>
+            <p class="state-line">
+              <span id="private-recovery-pill" class="state-pill">Nothing kept</span>
+              <span id="private-recovery-summary">No private recovery data is stored right now.</span>
+            </p>
+            <div class="card-foot">
+              <button id="private-clear-recovery" class="btn is-danger" type="button">Clear recovery now</button>
+            </div>
+          </section>
+
+          <p id="private-status" class="snapshot-inline-status" role="status" aria-live="polite" hidden></p>
+        </section>
+
+        <section id="storage-panel" class="settings-panel" data-panel-content="storage" aria-labelledby="storage-heading" hidden>
+          <header class="panel-header">
+            <p class="eyebrow">Terminus</p>
+            <h1 id="storage-heading">Storage</h1>
+            <p>See and manage website icons saved by Terminus.</p>
+          </header>
+
+          <section class="settings-card storage-card" aria-labelledby="storage-icons-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Website icons</p>
+              <h2 id="storage-icons-heading">Icon cache</h2>
+              <p>Saved locally so unloaded tabs keep their icons. Private windows never read this cache.</p>
+            </div>
+            <p class="state-line">
+              <span id="storage-favicon-count" class="state-pill is-accent">Unavailable</span>
+              <span id="storage-favicon-bytes" class="state-when"></span>
+            </p>
+            <div id="storage-access-section" class="settings-file-field storage-access-section" hidden>
+              <div class="settings-field-copy">
+                <strong>Icon host access</strong>
+                <span>Some sites keep their icon on another host. Allow only the hosts listed; you can take access back in Add-ons Manager.</span>
+              </div>
+              <div id="storage-access-list" class="storage-access-list"></div>
+            </div>
+            <div id="storage-icon-gallery" class="storage-icon-gallery" role="list" aria-label="Cached website icons"></div>
+            <p id="storage-icon-gallery-empty" class="settings-note">No website icons are cached.</p>
+            <p id="storage-status" class="settings-status" role="status" aria-live="polite" hidden></p>
+            <div class="card-foot storage-actions">
+              <button id="storage-remove-unused" class="btn" type="button">Remove unused</button>
+              <button id="storage-clear-favicons" class="btn is-danger" type="button">Clear website icons</button>
+            </div>
+          </section>
+        </section>
+
+        <section id="firefox-styling-panel" class="settings-panel firefox-styling-panel" data-panel-content="firefox-styling" aria-labelledby="firefox-styling-heading" hidden>
+          <header class="panel-header">
+            <p class="eyebrow">Terminus</p>
+            <h1 id="firefox-styling-heading">Optional Firefox Styling</h1>
+            <p>Hide the header bar Firefox draws above the sidebar. Optional: Terminus works the same without it.</p>
+          </header>
+
+          <section class="settings-card settings-card--lifted" aria-labelledby="firefox-styling-sheet-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Style sheet</p>
+              <h2 id="firefox-styling-sheet-heading"><span class="card-icon card-icon--firefox-styling" aria-hidden="true"></span>Sidebar header</h2>
+              <p>This small file hides Firefox's header above every sidebar, including other extensions. Firefox updates can break it.</p>
+            </div>
+            <figure class="styling-compare">
+              <div class="styling-frame" aria-hidden="true">
+                <div class="styling-window">
+                  <span class="styling-launcher"><i></i><i></i><i></i></span>
+                  <span class="styling-panel">
+                    <span class="styling-header">Terminus</span>
+                    <i class="styling-line"></i><i class="styling-line is-current"></i><i class="styling-line is-short"></i>
+                  </span>
+                </div>
+                <span class="styling-frame-label">Now</span>
+              </div>
+              <div class="styling-frame" aria-hidden="true">
+                <div class="styling-window">
+                  <span class="styling-launcher"><i></i><i></i><i></i></span>
+                  <span class="styling-panel">
+                    <i class="styling-line"></i><i class="styling-line is-current"></i><i class="styling-line is-short"></i>
+                  </span>
+                </div>
+                <span class="styling-frame-label">With the style sheet</span>
+              </div>
+              <figcaption class="visually-hidden">Now, a header bar reading Terminus sits above the sidebar. With the style sheet the sidebar starts at the top. Firefox's icon strip beside it stays in both.</figcaption>
+            </figure>
+            <p id="firefox-styling-status" class="settings-status" role="status" aria-live="polite" hidden></p>
+            <div class="card-foot">
+              <button id="firefox-styling-download" class="btn is-primary" type="button">Download CSS</button>
+              <span class="settings-note">Saves <code>userChrome.css</code>. Downloading changes nothing by itself.</span>
+            </div>
+          </section>
+
+          <section class="settings-card" aria-labelledby="firefox-styling-install-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Install</p>
+              <h2 id="firefox-styling-install-heading">Install it</h2>
+              <p>Follow these five steps once. Paste each copied address into Firefox's address bar.</p>
+            </div>
+            <ol class="setting-rows styling-steps">
+              <li class="setting-row">
+                <span class="setting-copy"><strong><span class="step-tag" aria-hidden="true">1</span>Open your profile folder</strong><span>At <code>about:support</code>, choose Open Folder beside Profile Folder (Show in Finder on a Mac).</span></span>
+                <button class="btn" type="button" data-copy="about:support" aria-label="Copy about:support">Copy</button>
+              </li>
+              <li class="setting-row">
+                <span class="setting-copy"><strong><span class="step-tag" aria-hidden="true">2</span>Add the file</strong><span>Create a folder called <code>chrome</code> and move the <code>userChrome.css</code> file into the <code>chrome</code> folder.</span></span>
+              </li>
+              <li class="setting-row">
+                <span class="setting-copy"><strong><span class="step-tag" aria-hidden="true">3</span>Open advanced settings</strong><span>Go to <code>about:config</code> and accept the warning Firefox shows.</span></span>
+                <button class="btn" type="button" data-copy="about:config" aria-label="Copy about:config">Copy</button>
+              </li>
+              <li class="setting-row">
+                <span class="setting-copy"><strong><span class="step-tag" aria-hidden="true">4</span>Allow custom styles</strong><span>Search for <code>toolkit.legacyUserProfileCustomizations.stylesheets</code> and set it to <code>true</code>.</span></span>
+                <button class="btn" type="button" data-copy="toolkit.legacyUserProfileCustomizations.stylesheets" aria-label="Copy the preference name">Copy</button>
+              </li>
+              <li class="setting-row">
+                <span class="setting-copy"><strong><span class="step-tag" aria-hidden="true">5</span>Restart Firefox</strong><span>Quit completely and reopen it. Closing the window isn't enough.</span></span>
+              </li>
+            </ol>
+            <p id="firefox-styling-copy-status" class="settings-status" role="status" aria-live="polite" hidden></p>
+          </section>
+
+          <section class="settings-card" aria-labelledby="firefox-styling-undo-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Undo</p>
+              <h2 id="firefox-styling-undo-heading">How to undo</h2>
+              <p>If <code>userChrome.css</code> contains only Terminus, delete it; otherwise remove only the Terminus block. Then quit and reopen Firefox. The preference can stay on.</p>
+            </div>
+          </section>
+
+          <section class="settings-card" aria-labelledby="firefox-styling-help-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Troubleshooting</p>
+              <h2 id="firefox-styling-help-heading">Header still there?</h2>
+            </div>
+            <dl class="styling-checks">
+              <div><dt>Wrong profile</dt><dd>Use the folder <code>about:support</code> opens in the Firefox you're using.</dd></div>
+              <div><dt>Wrong name</dt><dd>It must be <code>chrome/userChrome.css</code> exactly, not <code>userChrome(1).css</code> or <code>userChrome.css.txt</code>.</dd></div>
+              <div><dt>Preference off</dt><dd>The preference in step 4 must read <code>true</code>.</dd></div>
+              <div><dt>Not restarted</dt><dd>Firefox reads the file only at startup. Quit it completely.</dd></div>
+              <div><dt>After an update</dt><dd>Firefox can rename the header, and Terminus updates never replace your copy. Download again and replace only the Terminus rule (or the whole file when it contains nothing else).</dd></div>
+            </dl>
+          </section>
+        </section>
+
+        <section id="overview-panel" class="settings-panel overview-panel" data-panel-content="overview" aria-labelledby="overview-heading" hidden>
+          <header class="panel-header">
+            <p class="eyebrow">Terminus</p>
+            <h1 id="overview-heading">Overview</h1>
+            <p>Terminus keeps your tabs in workspaces, one for each part of your day. Here is what it does and where each setting lives.</p>
+          </header>
+
+          <section class="settings-card settings-card--lifted overview-glance" aria-labelledby="overview-glance-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">At a glance</p>
+              <h2 id="overview-glance-heading">The sidebar, piece by piece</h2>
+            </div>
+            <div class="overview-glance-body">
+              <figure class="overview-drawing" aria-labelledby="overview-drawing-caption">
+                <div class="overview-sidebar" aria-hidden="true">
+                  <div class="overview-rail">
+                    <span class="overview-rail-button overview-rail-button--active"><span class="overview-mask overview-mask--house"></span></span>
+                    <span class="overview-rail-button"><span class="overview-mask overview-mask--user"></span></span>
+                    <span class="overview-rail-button"><span class="overview-mask overview-mask--notebook"></span></span>
+                    <span class="overview-tag overview-tag--rail">A</span>
+                  </div>
+                  <div class="overview-pane">
+                    <div class="overview-group">
+                      <div class="overview-row overview-row--group">
+                        <span class="overview-folder overview-folder--filled"></span>
+                        <span class="overview-title">Research</span>
+                        <span class="overview-tag">B</span>
+                      </div>
+                      <div class="overview-row overview-row--member">
+                        <span class="overview-favicon overview-favicon--orange">R</span>
+                        <span class="overview-title">Reading list</span>
+                      </div>
+                      <div class="overview-row overview-row--member">
+                        <span class="overview-favicon overview-favicon--red">F</span>
+                        <span class="overview-title">Field notes</span>
+                      </div>
+                    </div>
+                    <div class="overview-row overview-row--current">
+                      <span class="overview-favicon overview-favicon--blue">I</span>
+                      <span class="overview-title">Inbox</span>
+                      <span class="overview-tag">C</span>
+                    </div>
+                    <div class="overview-row">
+                      <span class="overview-favicon overview-favicon--teal">P</span>
+                      <span class="overview-title">Project plan</span>
+                    </div>
+                  </div>
+                </div>
+                <figcaption id="overview-drawing-caption" class="visually-hidden">Drawing of the sidebar. The key beside it explains the parts marked A through C.</figcaption>
+              </figure>
+              <ol class="overview-key" aria-label="Key to the drawing">
+                <li><span class="overview-tag" aria-hidden="true">A</span><p><strong>Workspace rail</strong> Click an icon to switch. Drag to reorder, or lock it in Sidebar settings.</p></li>
+                <li><span class="overview-tag" aria-hidden="true">B</span><p><strong>Groups and trees</strong> Firefox tab groups keep their color. A collapsed group shows how many tabs it holds.</p></li>
+                <li><span class="overview-tag" aria-hidden="true">C</span><p><strong>The current tab</strong> Uses the highlight chosen in Appearance.</p></li>
+              </ol>
+            </div>
+          </section>
+
+          <section class="settings-card" aria-labelledby="overview-marks-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Reading the sidebar</p>
+              <h2 id="overview-marks-heading">What the marks mean</h2>
+              <p>Every cue has a filled and a hollow form, so loaded and unloaded never depend on color alone.</p>
+            </div>
+            <table class="overview-legend">
+              <thead>
+                <tr><th scope="col"><span class="visually-hidden">Mark</span></th><th scope="col">Loaded</th><th scope="col">Unloaded</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Tab</th>
+                  <td><span class="overview-load overview-load--loaded" role="img" aria-label="Filled circle"></span></td>
+                  <td><span class="overview-load overview-load--unloaded" role="img" aria-label="Dashed circle"></span></td>
+                </tr>
+                <tr>
+                  <th scope="row">Container tab</th>
+                  <td><span class="overview-star overview-star--filled" role="img" aria-label="Filled star"></span></td>
+                  <td><span class="overview-star" role="img" aria-label="Outlined star"></span></td>
+                </tr>
+                <tr>
+                  <th scope="row">Tab group</th>
+                  <td><span class="overview-folder overview-folder--filled" role="img" aria-label="Filled folder"></span></td>
+                  <td><span class="overview-folder" role="img" aria-label="Hollow folder"></span></td>
+                </tr>
+                <tr>
+                  <th scope="row">Collapsed count</th>
+                  <td><span class="overview-count" role="img" aria-label="White count">12</span></td>
+                  <td><span class="overview-count overview-count--unloaded" role="img" aria-label="Grey count">12</span></td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="settings-note">A container tab's star takes its container's color. Counts are exact up to 999, then show 999+.</p>
+          </section>
+
+          <section class="settings-card" aria-labelledby="overview-badges-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Reading the viewer</p>
+              <h2 id="overview-badges-heading">Snapshot badges</h2>
+              <p>These badges show where each saved snapshot came from.</p>
+            </div>
+            <ul class="overview-badges">
+              <li><span class="snapshot-kind snapshot-kind--manual">Manual</span><span>You saved it</span></li>
+              <li><span class="snapshot-kind snapshot-kind--automatic">Automatic</span><span>On the schedule</span></li>
+              <li><span class="snapshot-kind snapshot-kind--private">Private</span><span>From a private window</span></li>
+              <li><span class="snapshot-kind snapshot-kind--imported">Imported</span><span>From a file or older Terminus copy</span></li>
+            </ul>
+          </section>
+
+          <section class="settings-card" aria-labelledby="overview-moves-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Basics</p>
+              <h2 id="overview-moves-heading">Quick moves</h2>
+              <p>Most of Terminus works with four mouse actions.</p>
+            </div>
+            <dl class="overview-moves">
+              <div><dt><kbd>Click</kbd> a workspace</dt><dd>Switch to it. Other workspaces' tabs are hidden, never closed.</dd></div>
+              <div><dt><kbd>Right-click</kbd> anything</dt><dd>Open every action for that tab, group, or workspace.</dd></div>
+              <div><dt><kbd>Middle-click</kbd></dt><dd>Unload a tab, a group or a whole workspace to free memory.</dd></div>
+              <div><dt><kbd>Drag</kbd> a workspace</dt><dd>Move it on the rail.</dd></div>
+            </dl>
+          </section>
+
+          <section class="settings-card" aria-labelledby="overview-features-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Features</p>
+              <h2 id="overview-features-heading">What Terminus does</h2>
+            </div>
+            <div class="overview-cards">
+              <article class="overview-card" aria-labelledby="overview-card-workspaces">
+                <h3 id="overview-card-workspaces"><span class="card-icon card-icon--workspaces" aria-hidden="true"></span>Workspaces</h3>
+                <ul>
+                  <li>Each holds the tabs for one part of your day.</li>
+                  <li>Export layouts and custom icons without including tabs.</li>
+                  <li>Removing a workspace moves its tabs instead of closing them.</li>
+                </ul>
+                <div class="card-foot"><button class="btn" type="button" data-open-panel="workspaces">Open Workspaces <span aria-hidden="true">→</span></button></div>
+              </article>
+              <article class="overview-card" aria-labelledby="overview-card-snapshots">
+                <h3 id="overview-card-snapshots"><span class="card-icon card-icon--snapshots" aria-hidden="true"></span>Snapshots</h3>
+                <ul>
+                  <li>Saves workspaces, tabs, groups, and window layouts.</li>
+                  <li>Manual saves stay until you delete them.</li>
+                  <li>Restored tabs stay unloaded until selected.</li>
+                </ul>
+                <div class="card-foot"><button class="btn" type="button" data-open-panel="snapshots">Open Snapshots <span aria-hidden="true">→</span></button></div>
+              </article>
+              <article class="overview-card" aria-labelledby="overview-card-appearance">
+                <h3 id="overview-card-appearance"><span class="card-icon card-icon--appearance" aria-hidden="true"></span>Appearance</h3>
+                <ul>
+                  <li>Follow Firefox, or set a color or gradient.</li>
+                  <li>Four sizes for workspaces and tabs.</li>
+                  <li>Full labels or icons only.</li>
+                </ul>
+                <div class="card-foot"><button class="btn" type="button" data-open-panel="appearance">Open Appearance <span aria-hidden="true">→</span></button></div>
+              </article>
+            </div>
+          </section>
+
+          <section class="settings-card" aria-labelledby="overview-warnings-heading">
+            <div class="settings-card-heading">
+              <p class="settings-card-kicker">Warnings</p>
+              <h2 id="overview-warnings-heading">Warnings before destructive actions</h2>
+              <p>Each warning can be silenced from its own dialog with Don&rsquo;t warn me again. Silenced warnings can be turned back on here.</p>
+            </div>
+            <p class="state-line">
+              <span id="overview-warnings-pill" class="state-pill is-good">All on</span>
+              <span id="overview-warnings-status" role="status" aria-live="polite">Every warning is on.</span>
+            </p>
+            <div class="card-foot" hidden>
+              <button id="restore-warnings" class="btn" type="button" disabled>Turn all warnings back on</button>
+            </div>
+          </section>
+        </section>
+
+        <p id="settings-status" class="settings-status" role="status" aria-live="polite">
+          Loading settings…
+        </p>
+      </main>
+    </div>
+    <dialog id="storage-clear-dialog" class="settings-dialog" aria-labelledby="storage-clear-dialog-title">
+      <form id="storage-clear-form">
+        <h2 id="storage-clear-dialog-title">Clear cached website icons?</h2>
+        <p>This removes downloaded website icons and saved retry information. Open tabs and other Terminus data stay untouched. Icons can return when you revisit eligible sites.</p>
+        <div class="dialog-actions">
+          <button class="btn" id="storage-clear-cancel" type="button">Cancel</button>
+          <button id="storage-clear-submit" class="btn is-danger" type="submit">Clear website icons</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="snapshot-delete-dialog" class="settings-dialog" aria-labelledby="snapshot-delete-dialog-title">
+      <form id="snapshot-delete-form">
+        <h2 id="snapshot-delete-dialog-title">Delete snapshot?</h2>
+        <p id="snapshot-delete-dialog-details"></p>
+        <label class="dialog-preference">
+          <input id="snapshot-skip-delete-warning" type="checkbox" />
+          <span>Don&rsquo;t warn me again</span>
+        </label>
+        <div class="dialog-actions">
+          <button class="btn" id="snapshot-cancel-delete" type="button">Cancel</button>
+          <button id="snapshot-confirm-action" class="btn is-danger" type="submit">Delete</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="snapshot-cleanup-dialog" class="settings-dialog" aria-labelledby="snapshot-cleanup-dialog-title">
+      <form id="snapshot-cleanup-form">
+        <h2 id="snapshot-cleanup-dialog-title">Remove automatic saves?</h2>
+        <p id="snapshot-cleanup-intro">These settings remove automatic saves you already have:</p>
+        <ul id="snapshot-cleanup-counts" class="snapshot-cleanup-counts"></ul>
+        <p id="snapshot-cleanup-private-note" hidden>Private Snapshots may also be removed.</p>
+        <p>Manual saves, safety snapshots, and exported files are kept.</p>
+        <div class="dialog-actions">
+          <button class="btn" id="snapshot-cleanup-cancel" type="button">Cancel</button>
+          <button id="snapshot-cleanup-remove" class="btn is-danger" type="submit">Remove</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="bookmark-import-dialog" class="settings-dialog" aria-labelledby="bookmark-import-dialog-title">
+      <form id="bookmark-import-form">
+        <h2 id="bookmark-import-dialog-title">Import bookmarks</h2>
+        <p>Choose where the bookmarks come from. Terminus only reads bookmarks and never changes or deletes them.</p>
+        <div class="bookmark-import-choices">
+          <button class="btn" id="bookmark-import-firefox-choice" type="button">Firefox bookmarks</button>
+          <button class="btn" id="bookmark-import-file-choice" type="button">Bookmarks file from another browser</button>
+        </div>
+        <div class="dialog-actions">
+          <button class="btn" id="bookmark-import-cancel-dialog" type="button">Cancel</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="snapshot-container-dialog" class="settings-dialog" aria-labelledby="snapshot-container-dialog-title">
+      <form id="snapshot-container-form">
+        <h2 id="snapshot-container-dialog-title">Choose Firefox containers</h2>
+        <p>Choose an existing container. If no matching container exists, Terminus can create one from the saved name, color, and Firefox icon.</p>
+        <div id="snapshot-container-resolutions" class="snapshot-container-resolutions"></div>
+        <p class="settings-note">Ignore Containers restores the tabs as ordinary browsing tabs and clears their workspace container defaults. Cookies and login sessions are never restored.</p>
+        <div class="dialog-actions">
+          <button class="btn" id="snapshot-container-cancel" type="button">Cancel restore</button>
+          <button class="btn" id="snapshot-container-submit" type="submit">Continue</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="reset-all-settings-dialog" class="settings-dialog" aria-labelledby="reset-all-settings-dialog-title">
+      <form id="reset-all-settings-form">
+        <h2 id="reset-all-settings-dialog-title">Restore all defaults?</h2>
+        <p>This restores Terminus display, action, snapshot, navigation, and workspace defaults. Privacy settings, private recovery, custom icons, native Firefox containers, existing tab container identities, saved snapshots, exported files, and open tabs are kept. Container assignments on the original workspaces are kept.</p>
+        <div id="reset-all-settings-cleanup" class="dialog-cleanup-impact" hidden>
+          <p id="reset-all-settings-cleanup-summary"></p>
+          <ul id="reset-all-settings-cleanup-counts" class="snapshot-cleanup-counts"></ul>
+          <p id="reset-all-settings-cleanup-private-note" hidden>Private Snapshots may also be removed.</p>
+        </div>
+        <label class="dialog-preference">
+          <input id="reset-all-settings-confirm" type="checkbox" required />
+          <span>I understand that my Terminus setup will be reset.</span>
+        </label>
+        <div class="dialog-actions">
+          <button class="btn" id="reset-all-settings-cancel" type="button">Cancel</button>
+          <button id="reset-all-settings-submit" class="btn is-danger" type="submit" disabled>Restore all defaults</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="private-disable-recovery-dialog" class="settings-dialog" aria-labelledby="private-disable-recovery-title">
+      <form id="private-disable-recovery-form">
+        <h2 id="private-disable-recovery-title">Turn off private recovery?</h2>
+        <p>New private changes will stop being saved. The current recovery stays available until the private session ends, and saved Private Snapshots are kept.</p>
+        <div class="dialog-actions">
+          <button class="btn" id="private-disable-recovery-cancel" type="button">Cancel</button>
+          <button class="btn" type="submit">Turn off</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="private-clear-recovery-dialog" class="settings-dialog" aria-labelledby="private-clear-recovery-title">
+      <form id="private-clear-recovery-form">
+        <h2 id="private-clear-recovery-title">Clear saved private tabs?</h2>
+        <p>The saved recovery copy will be permanently deleted. Tabs already open in private windows stay open, and new private activity can create another recovery while the setting remains on.</p>
+        <div class="dialog-actions">
+          <button class="btn" id="private-clear-recovery-cancel" type="button">Cancel</button>
+          <button class="btn is-danger" type="submit">Clear saved private tabs</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="color-panel" class="color-panel settings-dialog" aria-labelledby="color-panel-heading">
+      <form id="color-panel-form">
+        <h2 id="color-panel-heading">Choose color</h2>
+        <div id="color-panel-palette" class="color-panel-palette" role="listbox" aria-label="Available colors" hidden></div>
+        <div id="color-panel-preview" class="color-panel-preview" data-color-panel-custom aria-hidden="true"></div>
+        <label class="color-panel-hex-label" data-color-panel-custom for="color-panel-hex">
+          Hex color
+          <input id="color-panel-hex" type="text" inputmode="text" maxlength="7" spellcheck="false" />
+        </label>
+        <div class="color-panel-channel" data-color-panel-custom>
+          <label for="color-panel-hue">Hue</label>
+          <output id="color-panel-hue-output" for="color-panel-hue"></output>
+          <input id="color-panel-hue" type="range" min="0" max="359" step="1" />
+        </div>
+        <div class="color-panel-channel" data-color-panel-custom>
+          <label for="color-panel-saturation">Saturation</label>
+          <output id="color-panel-saturation-output" for="color-panel-saturation"></output>
+          <input id="color-panel-saturation" type="range" min="0" max="100" step="1" />
+        </div>
+        <div class="color-panel-channel" data-color-panel-custom>
+          <label for="color-panel-lightness">Lightness</label>
+          <output id="color-panel-lightness-output" for="color-panel-lightness"></output>
+          <input id="color-panel-lightness" type="range" min="0" max="100" step="1" />
+        </div>
+        <div class="dialog-actions">
+          <button class="btn" id="color-panel-cancel" type="button">Cancel</button>
+          <button class="btn" id="color-panel-apply" type="submit">Apply color</button>
+        </div>
+      </form>
+    </dialog>
+    <script type="module" src="main.js"></script>
+  </body>
+</html>

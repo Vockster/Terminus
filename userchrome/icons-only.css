@@ -1,0 +1,143 @@
+/* ============================================================
+   Terminus sidebar — Icons Only, locked width
+   ------------------------------------------------------------
+   Removes the Firefox sidebar panel header and locks the sidebar
+   to the width Terminus needs in Icons Only mode, so there is no
+   dead space beside the icon column.
+   Optional, and not part of the extension. Terminus does not
+   read, write, detect, or depend on this file.
+   ============================================================
+
+   INSTALL
+
+     1. about:config  ->  set this to true:
+          toolkit.legacyUserProfileCustomizations.stylesheets
+
+     2. about:profiles  ->  find the profile you actually use,
+        and open its Root Directory.
+
+     3. Make a folder there named exactly:  chrome
+
+     4. Put this file inside it, renamed to exactly:  userChrome.css
+        Already have one? Append this instead of replacing it, or
+        you will lose the rules already there.
+
+     5. Fully quit Firefox and reopen. Closing the window is not
+        enough — the sheet is only read at startup.
+
+   SWITCHING
+
+     These three files are alternatives. All three remove the
+     Firefox sidebar panel header; they differ only in width.
+     Copy whichever one you want over
+     <profile>/chrome/userChrome.css  and restart.
+
+       original.css      width stays draggable
+       icons-only.css    locked narrow, for Icons Only mode
+       full-labels.css   locked wide, for Full Labels mode
+
+     The two locked files must match the content mode set in
+     Terminus Settings. A narrow lock with Full Labels showing is
+     not broken, but it will look cramped. original.css suits both
+     modes, because it locks nothing.
+
+   REMOVE
+
+     Delete the file. Fully quit and reopen. The header comes back
+     and Firefox is exactly as it ships. Nothing is left behind.
+
+     The pref from step 1 can stay on. It does nothing by itself.
+
+   VERSION WARNING
+
+     userChrome.css is not a supported Firefox feature. It is off
+     by default, applied by hand, and Firefox can rename or
+     restructure these elements in any release. When that happens
+     these files quietly stop working. If the sidebar ever looks
+     wrong after an update, remove this file before assuming
+     Terminus is at fault.
+
+     Observed working on Firefox Developer Edition 157.0, Windows.
+     Not verified on Firefox 153 ESR.
+
+   THE BUILT-IN LAUNCHER
+
+     Deliberately not handled here. Firefox has a real setting for
+     the icon strip beside the panel, and a supported setting beats
+     a CSS override that can break on update:
+
+       right-click the launcher -> Customize Sidebar -> Hide sidebar
+
+     or set  sidebar.visibility = hide-launcher  in about:config.
+
+   THE WIDTH, AND HOW TO CHANGE IT
+
+     Icons Only shows exactly two fixed columns:
+
+       workspace rail  +  tab icon column  +  8px scrollbar reserve
+
+     Both follow the Sidebar size presets in Terminus Settings,
+     and the two presets are independent:
+
+       preset    rail    icon column    column + 8
+       small      40         40             48
+       medium     46         46             54
+       large      56         56             64
+       massive    68         68             76
+
+     Set below for Workspace size large, Tab size small:
+
+       rail                         56
+       icon column + reserve        48
+       content                     104px
+       Firefox sidebar chrome       +5
+       total                       109px
+
+     The extra 5px is not Terminus. Firefox's own sidebar chrome
+     sits between the locked box and the extension document, so a
+     lock set to the bare content width clips by a few pixels.
+     That overhead was measured on this build, not calculated, and
+     may differ on yours — if the icons clip, add a pixel or two;
+     if there is dead space, remove one.
+
+     Change either preset and this number is wrong. Recompute as
+     rail + icon column + 8, add the chrome overhead, and edit the
+     one value on the --sidebar-locked-width line.
+
+   ============================================================ */
+
+/* No sidebar panel header. */
+#sidebar-panel-header {
+  display: none !important;
+}
+
+:root {
+  --sidebar-locked-width: 109px;
+}
+
+/* Lock the sidebar. min and max are both set so Firefox's own
+   200px sidebar floor cannot override it. */
+#sidebar-box {
+  min-width: var(--sidebar-locked-width) !important;
+  max-width: var(--sidebar-locked-width) !important;
+  width: var(--sidebar-locked-width) !important;
+  flex: 0 0 var(--sidebar-locked-width) !important;
+}
+
+/* Let the panel fill that width exactly. Border, outline and
+   shadow are cleared so the locked width is the usable width. */
+#sidebar {
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Locked means not draggable. Delete this rule to keep the drag
+   handle; the width above then acts as a starting width that
+   Firefox remembers per profile. */
+#sidebar-splitter {
+  display: none !important;
+}

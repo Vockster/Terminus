@@ -1,0 +1,12 @@
+<!--
+  Lucide Wallet icon, user-supplied geometry.
+  Supplied/moved source SHA-256: 3ca385c4781efa37c4f0627c3388e6538ed981f6af88cc584ea61ce290c5db79
+  Geometry verified against Lucide commit 5d592a96aaeb4a3a09ffd8134f8f5ed878c9a0c5:
+  https://github.com/lucide-icons/lucide/blob/5d592a96aaeb4a3a09ffd8134f8f5ed878c9a0c5/icons/wallet.svg
+
+  ISC License
+  Copyright (c) 2026 Lucide Icons and Contributors
+  Feather-derived icons: MIT License, Copyright (c) 2013-present Cole Bemis
+  Full license: ../LICENSE.lucide.txt
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>

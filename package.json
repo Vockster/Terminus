@@ -1,0 +1,46 @@
+{
+  "name": "terminus",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Terminus, a Firefox workspace sidebar extension",
+  "license": "MPL-2.0",
+  "scripts": {
+    "check:tooling": "node scripts/firefox-tooling.mjs check",
+    "lint:extension": "node scripts/firefox-tooling.mjs lint",
+    "build:extension": "node scripts/firefox-tooling.mjs build",
+    "test": "node --test \"tests/**/*.test.js\"",
+    "test:firefox": "node scripts/firefox-tooling.mjs run"
+  },
+  "devDependencies": {
+    "web-ext": "10.6.0"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "webExt": {
+    "sourceDir": ".",
+    "artifactsDir": "web-ext-artifacts",
+    "ignoreFiles": [
+      "**/*",
+      "!manifest.json",
+      "!src",
+      "!src/**",
+      "!userchrome",
+      "!userchrome/original.css",
+      "!CHANGELOG.md",
+      "!LICENSE",
+      "!PRIVACY.md",
+      "!README.md",
+      "!SECURITY.md"
+    ],
+    "run": {
+      "target": [
+        "firefox-desktop"
+      ]
+    },
+    "lint": {
+      "warningsAsErrors": true
+    }
+  }
+}

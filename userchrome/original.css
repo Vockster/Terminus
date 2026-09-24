@@ -1,0 +1,4 @@
+/* No sidebar panel header. */
+#sidebar-panel-header {
+  display: none !important;
+}

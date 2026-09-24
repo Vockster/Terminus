@@ -1,0 +1,12 @@
+<!--
+  Lucide Van icon, user-supplied geometry.
+  Supplied/moved source SHA-256: 3d51e3c1ab07cd253c884c22fecc9ed57b463abdc7018c7849868c85e9305a43
+  Geometry verified against Lucide commit 5d592a96aaeb4a3a09ffd8134f8f5ed878c9a0c5:
+  https://github.com/lucide-icons/lucide/blob/5d592a96aaeb4a3a09ffd8134f8f5ed878c9a0c5/icons/van.svg
+
+  ISC License
+  Copyright (c) 2026 Lucide Icons and Contributors
+  Feather-derived icons: MIT License, Copyright (c) 2013-present Cole Bemis
+  Full license: ../LICENSE.lucide.txt
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 6v5a1 1 0 0 0 1 1h6.102a1 1 0 0 1 .712.298l.898.91a1 1 0 0 1 .288.702V17a1 1 0 0 1-1 1h-3"/><path d="M5 18H3a1 1 0 0 1-1-1V8a2 2 0 0 1 2-2h12c1.1 0 2.1.8 2.4 1.8l1.176 4.2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>

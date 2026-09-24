@@ -1,0 +1,68 @@
+{
+  "manifest_version": 3,
+  "name": "Terminus",
+  "short_name": "Terminus",
+  "version": "0.1.0",
+  "description": "Organize your tabs into workspaces and switch between them from a compact sidebar rail.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "terminus-dev@local.invalid",
+      "strict_min_version": "153.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
+    }
+  },
+  "incognito": "spanning",
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'; img-src 'self' blob: moz-extension:; connect-src 'self' https:"
+  },
+  "permissions": [
+    "sessions",
+    "storage",
+    "alarms",
+    "unlimitedStorage",
+    "tabs",
+    "tabHide",
+    "tabGroups",
+    "menus",
+    "theme",
+    "search",
+    "contextualIdentities"
+  ],
+  "optional_permissions": [
+    "downloads",
+    "cookies",
+    "bookmarks"
+  ],
+  "optional_host_permissions": [
+    "https://*/*"
+  ],
+  "background": {
+    "scripts": [
+      "src/background/main.js"
+    ],
+    "type": "module"
+  },
+  "icons": {
+    "16": "src/assets/icons/app-sidebar.svg",
+    "32": "src/assets/icons/app-sidebar.svg",
+    "48": "src/assets/icons/app.svg",
+    "96": "src/assets/icons/app.svg"
+  },
+  "sidebar_action": {
+    "default_title": "Terminus",
+    "default_icon": {
+      "16": "src/assets/icons/app-sidebar.svg",
+      "32": "src/assets/icons/app-sidebar.svg"
+    },
+    "default_panel": "src/sidebar/index.html",
+    "open_at_install": true
+  },
+  "options_ui": {
+    "page": "src/settings/index.html",
+    "open_in_tab": true
+  }
+}

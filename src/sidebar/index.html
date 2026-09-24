@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en" data-action-buttons="shown" data-content-mode="full">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Terminus</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="sidebar-shell" aria-labelledby="sidebar-title">
+      <h1 id="sidebar-title" class="visually-hidden">Terminus workspaces</h1>
+      <nav class="workspace-navigation" aria-label="Workspaces">
+        <ul id="workspace-list" class="workspace-rail" aria-busy="true"></ul>
+        <div class="workspace-controls">
+          <button
+            id="open-settings"
+            class="rail-action"
+            type="button"
+            aria-label="Open Terminus settings"
+          >
+            <span class="rail-action-icon-box" aria-hidden="true">
+              <span class="rail-action-icon rail-action-icon--settings"></span>
+            </span>
+          </button>
+        </div>
+      </nav>
+      <section class="tab-pane" aria-label="Tabs in active workspace">
+        <div id="tab-search" class="tab-search" role="search" aria-label="Search tabs" data-open="false" hidden>
+          <button
+            id="tab-search-toggle"
+            class="tab-search-toggle"
+            type="button"
+            aria-label="Search tabs"
+            aria-expanded="false"
+            aria-controls="tab-search-controls"
+          ><span class="tab-search-toggle-icon" aria-hidden="true"></span></button>
+          <div id="tab-search-controls" class="tab-search-controls" hidden>
+            <label class="visually-hidden" for="tab-search-input">Search tabs</label>
+            <div class="tab-search-input-wrap">
+              <input
+                id="tab-search-input"
+                class="tab-search-input"
+                type="search"
+                inputmode="search"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="Search all tabs…"
+                aria-controls="tab-search-results"
+              />
+              <button
+                id="tab-search-clear"
+                class="tab-search-clear"
+                type="button"
+                aria-label="Clear tab search"
+                hidden
+              ><span aria-hidden="true"></span></button>
+            </div>
+            <label class="visually-hidden" for="tab-search-scope">Search scope</label>
+            <select id="tab-search-scope" class="tab-search-scope">
+              <option value="window">All Workspaces</option>
+              <option value="workspace">This Workspace</option>
+            </select>
+          </div>
+        </div>
+        <div id="tab-scroll" class="tab-scroll">
+          <div
+            id="tab-search-results"
+            class="tab-search-results"
+            role="region"
+            aria-label="Tab search results"
+            aria-live="polite"
+            hidden
+          ></div>
+          <div id="tab-list" class="tab-list" role="tree" aria-busy="true"></div>
+        </div>
+        <div id="tab-footer" class="tab-footer">
+          <button id="undo-sidebar-action" class="undo-sidebar-button" type="button" hidden>
+            <span class="undo-sidebar-icon" aria-hidden="true"></span>
+            <span class="undo-sidebar-label" aria-hidden="true"></span>
+          </button>
+          <div id="new-tab-slot" class="new-tab-slot">
+            <button
+              id="new-workspace-tab"
+              class="new-tab-button"
+              type="button"
+              aria-label="New tab"
+              aria-describedby="new-tab-hint"
+              aria-haspopup="menu"
+            ><span class="new-tab-icon" aria-hidden="true"></span><span class="new-tab-label" aria-hidden="true">New tab</span></button>
+          </div>
+        </div>
+        <p id="new-tab-hint" class="visually-hidden">Right-click or press the Context Menu key for container choices.</p>
+        <p id="workspace-status" class="workspace-status visually-hidden" role="status" aria-live="polite"></p>
+      </section>
+    </main>
+    <div id="sidebar-command-menu" class="command-menu" role="menu" hidden></div>
+    <dialog id="rename-workspace-dialog" class="workspace-dialog" aria-labelledby="rename-workspace-title">
+      <form id="rename-workspace-form" method="dialog">
+        <h2 id="rename-workspace-title">Rename workspace</h2>
+        <label for="rename-workspace-input">Workspace name</label>
+        <input id="rename-workspace-input" name="workspaceName" type="text" maxlength="80" required />
+        <div class="dialog-actions">
+          <button id="cancel-workspace-rename" type="button">Cancel</button>
+          <button type="submit">Save</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="rename-group-dialog" class="workspace-dialog" aria-labelledby="rename-group-title">
+      <form id="rename-group-form" method="dialog">
+        <h2 id="rename-group-title">Rename group</h2>
+        <label for="rename-group-input">Group name</label>
+        <input id="rename-group-input" name="groupName" type="text" maxlength="255" />
+        <div class="dialog-actions">
+          <button id="cancel-group-rename" type="button">Cancel</button>
+          <button type="submit">Save</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="load-tabs-dialog" class="workspace-dialog" aria-labelledby="load-tabs-title">
+      <form id="load-tabs-form" method="dialog">
+        <h2 id="load-tabs-title">Load all tabs?</h2>
+        <p id="load-tabs-details"></p>
+        <label class="dialog-preference">
+          <input id="skip-many-tab-load-warning" type="checkbox" />
+          <span>Don&rsquo;t warn me again</span>
+        </label>
+        <div class="dialog-actions">
+          <button id="cancel-tab-load" type="button">Cancel</button>
+          <button id="confirm-tab-load" type="submit">Load tabs</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="close-tabs-dialog" class="workspace-dialog" aria-labelledby="close-tabs-title">
+      <form id="close-tabs-form" method="dialog">
+        <h2 id="close-tabs-title">Close tabs?</h2>
+        <p id="close-tabs-details"></p>
+        <p class="dialog-warning">This action closes tabs in Firefox. Review the tab count before continuing.</p>
+        <label class="dialog-preference">
+          <input id="skip-multiple-tab-close-warning" type="checkbox" />
+          <span>Don’t warn me again</span>
+        </label>
+        <div class="dialog-actions">
+          <button id="cancel-tab-closure" type="button">Cancel</button>
+          <button id="confirm-tab-closure" class="danger-button" type="submit">Close tabs</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="move-container-dialog" class="workspace-dialog" aria-labelledby="move-container-title">
+      <form id="move-container-form" method="dialog">
+        <h2 id="move-container-title">Move to container</h2>
+        <fieldset class="container-move-choices">
+          <legend class="visually-hidden">Container</legend>
+          <div id="move-container-choices" class="container-move-list"></div>
+        </fieldset>
+        <p class="dialog-warning">Pages reload in the new container. Sign-ins, form contents, and back/forward history don’t carry over.</p>
+        <div class="dialog-actions">
+          <button id="cancel-container-move" type="button">Cancel</button>
+          <button id="confirm-container-move" type="submit">Move</button>
+        </div>
+      </form>
+    </dialog>
+    <script type="module" src="main.js"></script>
+  </body>
+</html>

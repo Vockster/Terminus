@@ -1,0 +1,12 @@
+<!--
+  Lucide Heart icon, user-supplied geometry.
+  Supplied/moved source SHA-256: f2ad91205a80c2e0ddfa9256da57a3cfae757dbd5486f749267145ba7990a6cb
+  Geometry verified against Lucide commit 5d592a96aaeb4a3a09ffd8134f8f5ed878c9a0c5:
+  https://github.com/lucide-icons/lucide/blob/5d592a96aaeb4a3a09ffd8134f8f5ed878c9a0c5/icons/heart.svg
+
+  ISC License
+  Copyright (c) 2026 Lucide Icons and Contributors
+  Feather-derived icons: MIT License, Copyright (c) 2013-present Cole Bemis
+  Full license: ../LICENSE.lucide.txt
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"/></svg>

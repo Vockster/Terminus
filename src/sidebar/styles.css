@@ -1,0 +1,2232 @@
+/* These mirror the Medium preset and only apply until the sidebar applies the
+   user's own geometry. */
+:root {
+  --workspace-rail-size: 46px;
+  --workspace-button-size: 38px;
+  --workspace-icon-size: 24px;
+  --workspace-divider-size: 16px;
+  --tab-icon-column-size: 46px;
+  --tab-tile-size: 38px;
+  --tab-row-size: 38px;
+  --tab-favicon-size: 24px;
+  --tab-label-font-size: 16px;
+  --tab-control-size: 27px;
+  --tab-disclosure-size: 19px;
+  --tab-count-font-size: 14px;
+  --tab-count-line-size: 16px;
+  --tab-status-width: 43px;
+  --tree-indent-size: 19px;
+  --workspace-footer-requirement: 46px;
+  --tab-footer-requirement: 46px;
+  --workspace-count-font-size: 9px;
+  --workspace-menu-size: 17px;
+  --workspace-unavailable-size: 12px;
+  --sidebar-footer-size: 46px;
+  /* Medium's 46px icon column plus a stable 8px thin-scrollbar reserve. */
+  --tab-icon-pane-size: 54px;
+  --sidebar-background: Canvas;
+  --sidebar-background-image: none;
+  --sidebar-background-position: top right;
+  --sidebar-background-repeat: no-repeat;
+  --sidebar-background-size: cover;
+  --sidebar-surface-color: Canvas;
+  --sidebar-foreground: CanvasText;
+  --sidebar-accent: AccentColor;
+  --sidebar-active-tab-highlight: AccentColor;
+  --sidebar-border-color: CanvasText;
+  --sidebar-danger: light-dark(#b00020, #ff8a8a);
+  --sidebar-badge-background: #1f2937;
+  --sidebar-badge-foreground: #fff;
+  --tree-guide-color: color-mix(in srgb, var(--sidebar-foreground) 30%, transparent);
+  --sidebar-color-scheme: light dark;
+  color-scheme: var(--sidebar-color-scheme);
+  font-family: var(--sidebar-font-family, system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-size: var(--sidebar-font-size, 16px);
+  line-height: 1.4;
+  background-color: var(--sidebar-background);
+  background-image: var(--sidebar-background-image);
+  background-position: var(--sidebar-background-position);
+  background-repeat: var(--sidebar-background-repeat);
+  background-size: var(--sidebar-background-size);
+  color: var(--sidebar-foreground);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-block-size: 100%;
+}
+
+body {
+  margin: 0;
+  background: transparent;
+  color: var(--sidebar-foreground);
+}
+
+.sidebar-shell {
+  position: relative;
+  display: flex;
+  min-block-size: 100vh;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+.sidebar-shell::after {
+  position: absolute;
+  z-index: 10;
+  inset-inline: 0;
+  inset-block-end: var(--sidebar-footer-size);
+  border-block-start: 1px solid color-mix(in srgb, var(--sidebar-foreground) 14%, transparent);
+  content: "";
+  pointer-events: none;
+}
+
+.workspace-navigation {
+  display: grid;
+  flex: 0 0 var(--workspace-rail-size);
+  inline-size: var(--workspace-rail-size);
+  block-size: 100vh;
+  grid-template-rows: minmax(0, 1fr) auto;
+  overflow: hidden;
+  border-inline-end: 1px solid color-mix(in srgb, var(--sidebar-border-color) 22%, transparent);
+  background: color-mix(in srgb, var(--sidebar-surface-color) 24%, transparent);
+}
+
+.workspace-rail {
+  display: flex;
+  min-block-size: 0;
+  margin: 0;
+  padding: 4px;
+  flex-direction: column;
+  gap: 4px;
+  list-style: none;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.workspace-item {
+  position: relative;
+  flex: 0 0 auto;
+  display: block;
+}
+
+.workspace-item[data-drop-position="before"]::before,
+.workspace-item[data-drop-position="after"]::after {
+  position: absolute;
+  z-index: 5;
+  inset-inline: 1px;
+  block-size: 3px;
+  border-radius: 2px;
+  background: var(--sidebar-accent);
+  content: "";
+}
+
+.workspace-item[data-drop-position="before"]::before {
+  inset-block-start: -3px;
+}
+
+.workspace-item[data-drop-position="after"]::after {
+  inset-block-end: -3px;
+}
+
+.workspace-item.is-dragging {
+  opacity: 0.48;
+}
+
+.workspace-divider {
+  position: relative;
+  flex: 0 0 var(--workspace-divider-size);
+  block-size: var(--workspace-divider-size);
+  margin-inline: 4px;
+  pointer-events: none;
+}
+
+.workspace-divider::after {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline: 0;
+  border-block-start: 1px solid color-mix(in srgb, var(--sidebar-foreground) 28%, transparent);
+  content: "";
+}
+
+.workspace-space {
+  flex: 1 1 0;
+  min-block-size: 12px;
+  pointer-events: none;
+}
+
+.workspace-add-item {
+  display: grid;
+  flex: 0 0 auto;
+  justify-items: center;
+  gap: 4px;
+}
+
+:root[data-add-workspace-button="hidden"] .workspace-add-item {
+  display: none;
+}
+
+.workspace-add-divider {
+  position: relative;
+  justify-self: stretch;
+  block-size: var(--workspace-divider-size);
+  margin-inline: 4px;
+}
+
+.workspace-add-divider::after {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline: 0;
+  border-block-start: 1px solid color-mix(in srgb, var(--sidebar-foreground) 28%, transparent);
+  content: "";
+}
+
+.workspace-add-button {
+  display: grid;
+  inline-size: var(--workspace-button-size);
+  block-size: var(--workspace-button-size);
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--sidebar-foreground);
+  cursor: pointer;
+}
+
+.workspace-add-button:hover {
+  background: color-mix(in srgb, var(--sidebar-foreground) 10%, transparent);
+}
+
+.workspace-add-button:focus-visible {
+  outline: 2px solid var(--sidebar-accent);
+  outline-offset: 1px;
+}
+
+.workspace-add-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.workspace-add-icon {
+  inline-size: clamp(14px, calc(var(--workspace-icon-size) * 0.7), 28px);
+  block-size: clamp(14px, calc(var(--workspace-icon-size) * 0.7), 28px);
+  background: currentColor;
+  mask: url("../assets/icons/plus-thin.svg") center / contain no-repeat;
+}
+
+.workspace-entry {
+  position: relative;
+  display: grid;
+  inline-size: var(--workspace-button-size);
+  block-size: var(--workspace-button-size);
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+}
+
+.workspace-entry:hover {
+  background: transparent;
+}
+
+.workspace-entry::before {
+  position: absolute;
+  inset-block: 8px;
+  inset-inline-start: -4px;
+  inline-size: 3px;
+  border-radius: 0 4px 4px 0;
+  background: transparent;
+  content: "";
+}
+
+.workspace-entry:focus-visible {
+  outline: 2px solid var(--sidebar-accent);
+  outline-offset: 1px;
+}
+
+.workspace-entry.drop-workspace {
+  outline: 2px dashed var(--sidebar-accent);
+  outline-offset: -2px;
+}
+
+.workspace-entry[aria-pressed="true"] {
+  background: transparent;
+}
+
+.workspace-entry[aria-pressed="true"]::before {
+  background: var(--sidebar-accent);
+}
+
+.workspace-entry:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.workspace-menu-button {
+  position: absolute;
+  z-index: 4;
+  display: grid;
+  inset-inline-end: 0;
+  inset-block-end: 0;
+  inline-size: var(--workspace-menu-size);
+  block-size: var(--workspace-menu-size);
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--sidebar-surface-color) 86%, transparent);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  line-height: 1;
+  opacity: 0;
+}
+
+.workspace-item:hover .workspace-menu-button,
+.workspace-item:focus-within .workspace-menu-button {
+  opacity: 1;
+}
+
+.workspace-menu-button:hover {
+  background: color-mix(in srgb, var(--sidebar-foreground) 16%, var(--sidebar-surface-color));
+}
+
+.workspace-menu-button:focus-visible {
+  outline: 2px solid var(--sidebar-accent);
+  outline-offset: 0;
+}
+
+/* The Full Labels action occupies the same scarce corner as a four-character
+   count. Hide the count only while that action is exposed, never underneath it. */
+:root[data-content-mode="full"][data-action-buttons="shown"]
+  .workspace-item:hover .workspace-tab-count,
+:root[data-content-mode="full"][data-action-buttons="shown"]
+  .workspace-item:focus-within .workspace-tab-count {
+  opacity: 0;
+}
+
+.workspace-icon-box {
+  position: relative;
+  display: grid;
+  inline-size: var(--workspace-button-size);
+  block-size: var(--workspace-button-size);
+  grid-template-rows: var(--workspace-icon-size) minmax(0, 1fr);
+  align-content: center;
+  justify-items: center;
+  transform-origin: center;
+}
+
+.workspace-icon-box::before {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 50%;
+  inline-size: var(--workspace-icon-size);
+  block-size: var(--workspace-icon-size);
+  border-radius: 50%;
+  background: var(--workspace-glow-color, transparent);
+  content: "";
+  filter: blur(7px);
+  opacity: 0;
+  pointer-events: none;
+  translate: -50% 0;
+  transition: opacity 120ms ease, filter 120ms ease;
+}
+
+.workspace-icon {
+  position: relative;
+  z-index: 1;
+  inline-size: var(--workspace-icon-size);
+  block-size: var(--workspace-icon-size);
+  background: var(--workspace-color);
+  mask: var(--workspace-mask) center / contain no-repeat;
+  transform: scale(var(--workspace-icon-optical-scale, 1));
+  transform-origin: center;
+  filter:
+    drop-shadow(0 0 1px var(--sidebar-surface-color))
+    drop-shadow(0 0 1px var(--sidebar-foreground));
+  transition: filter 120ms ease, transform 120ms ease;
+}
+
+.workspace-icon--image {
+  background: none;
+  mask: none;
+  object-fit: contain;
+}
+
+.workspace-entry:hover .workspace-icon {
+  filter:
+    brightness(1.14)
+    drop-shadow(0 0 1px var(--sidebar-surface-color))
+    drop-shadow(0 0 1px var(--sidebar-foreground));
+}
+
+.workspace-entry[aria-pressed="true"] .workspace-icon {
+  filter:
+    brightness(1.08)
+    drop-shadow(0 0 1px var(--sidebar-surface-color))
+    drop-shadow(0 0 1px var(--sidebar-foreground));
+}
+
+.workspace-entry[data-load-state="unloaded"] .workspace-icon {
+  opacity: 0.65;
+}
+
+[data-workspace-glow-mode="container"] .workspace-entry[data-container-status="available"] {
+  --workspace-glow-color: var(--workspace-container-color);
+}
+
+[data-workspace-glow-mode="workspace"] .workspace-entry[data-container-status="available"] {
+  --workspace-glow-color: var(--workspace-color);
+}
+
+[data-workspace-glow-mode="container"] .workspace-entry[data-container-status="available"] .workspace-icon,
+[data-workspace-glow-mode="workspace"] .workspace-entry[data-container-status="available"] .workspace-icon {
+  filter:
+    brightness(1.08)
+    drop-shadow(0 0 5px var(--workspace-glow-color))
+    drop-shadow(0 0 2px var(--workspace-glow-color))
+    drop-shadow(0 0 1px var(--sidebar-surface-color));
+}
+
+[data-workspace-glow-mode="container"] .workspace-entry[data-container-status="available"] .workspace-icon-box::before,
+[data-workspace-glow-mode="workspace"] .workspace-entry[data-container-status="available"] .workspace-icon-box::before {
+  opacity: 0.8;
+}
+
+[data-workspace-glow-mode="container"] .workspace-entry[data-container-status="available"][aria-pressed="true"] .workspace-icon-box::before,
+[data-workspace-glow-mode="container"] .workspace-entry[data-container-status="available"]:hover .workspace-icon-box::before,
+[data-workspace-glow-mode="workspace"] .workspace-entry[data-container-status="available"][aria-pressed="true"] .workspace-icon-box::before,
+[data-workspace-glow-mode="workspace"] .workspace-entry[data-container-status="available"]:hover .workspace-icon-box::before {
+  filter: blur(8px);
+  opacity: 1;
+}
+
+[data-workspace-glow-mode="container"] .workspace-entry[data-container-status="available"]:hover .workspace-icon,
+[data-workspace-glow-mode="workspace"] .workspace-entry[data-container-status="available"]:hover .workspace-icon {
+  filter:
+    brightness(1.16)
+    drop-shadow(0 0 6px var(--workspace-glow-color))
+    drop-shadow(0 0 2px var(--workspace-glow-color))
+    drop-shadow(0 0 1px var(--sidebar-surface-color));
+}
+
+.workspace-container-unavailable {
+  position: absolute;
+  z-index: 3;
+  inset-inline-start: 2px;
+  inset-block-start: 2px;
+  display: grid;
+  inline-size: var(--workspace-unavailable-size);
+  block-size: var(--workspace-unavailable-size);
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  background: var(--sidebar-surface-color);
+  color: color-mix(in srgb, var(--sidebar-foreground) 72%, var(--sidebar-surface-color));
+  font-size: max(8px, calc(var(--workspace-unavailable-size) * 0.68));
+  font-weight: 800;
+  line-height: 1;
+}
+
+.workspace-container-unavailable[hidden] {
+  display: none;
+}
+
+.workspace-rail--switching .workspace-entry--switch-source .workspace-icon-box {
+  animation: workspace-switch-out 180ms ease both;
+}
+
+.workspace-rail--switching .workspace-entry--switch-target .workspace-icon-box {
+  opacity: 0.72;
+  transform: scale(0.94);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.workspace-rail--switch-arrived .workspace-entry--switch-arrived .workspace-icon-box {
+  animation: workspace-switch-in 180ms ease both;
+}
+
+@keyframes workspace-switch-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0.72;
+    transform: scale(0.94);
+  }
+}
+
+@keyframes workspace-switch-in {
+  from {
+    opacity: 0.72;
+    transform: scale(0.94);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Counts are transparent status text. Exact values stay in the owning row's
+   accessible name and title when the visible range abbreviates. */
+.count-badge {
+  display: block;
+  min-inline-size: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #fff;
+  font-size: var(--tab-count-font-size);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+  text-shadow: 0 1px 2px #000, 0 0 2px #000;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.count-badge[data-load-state="empty"],
+.count-badge[data-load-state="unloaded"] {
+  color: color-mix(in srgb, var(--sidebar-foreground) 58%, var(--sidebar-surface-color));
+  font-weight: 400;
+}
+
+.workspace-tab-count {
+  position: relative;
+  z-index: 2;
+  grid-row: 2;
+  align-self: end;
+  font-size: var(--workspace-count-font-size);
+}
+
+/* Full Labels assigns the count to the load/status column; it never shares or
+   pads the title cell. */
+.tab-count-badge {
+  position: relative;
+  z-index: 4;
+  grid-row: 1;
+  grid-column: 5;
+  justify-self: center;
+  align-self: center;
+}
+
+.tab-row--split .tab-count-badge {
+  grid-column: 6;
+}
+
+.tab-group-header > .tab-count-badge {
+  grid-column: 4;
+}
+
+.tab-status-owner {
+  display: flex;
+  grid-row: 1;
+  grid-column: 5;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.tab-row--split .tab-status-owner {
+  grid-column: 6;
+}
+
+.workspace-controls {
+  display: flex;
+  min-block-size: var(--sidebar-footer-size);
+  padding: 4px;
+  justify-content: center;
+  background: transparent;
+}
+
+/* The tab pane is the size container for every width rule below, so layouts
+   respond to the pane a user drags, not to the whole sidebar document. */
+.tab-pane {
+  container: tab-pane / inline-size;
+  position: relative;
+  display: grid;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  block-size: 100vh;
+  grid-template-rows: auto minmax(0, 1fr) var(--sidebar-footer-size);
+  overflow: hidden;
+  background: transparent;
+}
+
+.tab-pane[data-tab-search-position="bottom"] {
+  grid-template-rows: minmax(0, 1fr) auto var(--sidebar-footer-size);
+}
+
+/* Closed search is one compact magnifier above (or below) the tab list. Only an
+   open search spends a full input row, and it stays inside the tab pane. */
+.tab-search {
+  display: flex;
+  grid-row: 1;
+  min-inline-size: 0;
+  padding: 3px 4px 0;
+  align-items: center;
+  gap: 4px;
+}
+
+.tab-pane[data-tab-search-position="bottom"] .tab-search {
+  grid-row: 2;
+  padding: 0 4px 3px;
+}
+
+.tab-search[hidden] {
+  display: none;
+}
+
+.tab-search[data-open="true"] {
+  padding: 5px 6px 5px 4px;
+  border-block-end: 1px solid color-mix(in srgb, var(--sidebar-border-color) 24%, transparent);
+}
+
+.tab-pane[data-tab-search-position="bottom"] .tab-search[data-open="true"] {
+  border-block-start: 1px solid color-mix(in srgb, var(--sidebar-border-color) 24%, transparent);
+  border-block-end: 0;
+}
+
+.tab-search-toggle {
+  display: grid;
+  flex: none;
+  inline-size: var(--tab-control-size);
+  block-size: var(--tab-control-size);
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: color-mix(in srgb, var(--sidebar-foreground) 76%, transparent);
+  cursor: pointer;
+}
+
+.tab-search-toggle:hover,
+.tab-search-toggle[aria-expanded="true"] {
+  background: color-mix(in srgb, var(--sidebar-foreground) 10%, transparent);
+  color: var(--sidebar-foreground);
+}
+
+.tab-search-toggle-icon {
+  inline-size: clamp(14px, calc(var(--tab-control-size) * 0.6), 20px);
+  block-size: clamp(14px, calc(var(--tab-control-size) * 0.6), 20px);
+  background: currentColor;
+  mask: url("../assets/icons/search.svg") center / contain no-repeat;
+}
+
+.tab-search-controls {
+  display: grid;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  grid-template-columns: minmax(5rem, 1fr) minmax(7.5rem, auto);
+  gap: 5px;
+}
+
+.tab-search-controls[hidden] {
+  display: none;
+}
+
+.tab-search-input-wrap {
+  position: relative;
+  min-inline-size: 0;
+}
+
+.tab-search-input,
+.tab-search-scope {
+  min-inline-size: 0;
+  block-size: 30px;
+  border: 1px solid color-mix(in srgb, var(--sidebar-border-color) 72%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--sidebar-surface-color) 90%, var(--sidebar-foreground));
+  color: inherit;
+  font: inherit;
+  font-size: var(--tab-label-font-size);
+}
+
+.tab-search-input {
+  inline-size: 100%;
+  padding-inline: 8px;
+}
+
+.tab-search-input:not(:placeholder-shown) {
+  padding-inline-end: 31px;
+}
+
+.tab-search-input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.tab-search-clear {
+  position: absolute;
+  inset-block: 3px;
+  inset-inline-end: 3px;
+  display: grid;
+  inline-size: 24px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.tab-search-clear[hidden] {
+  display: none;
+}
+
+.tab-search-clear:hover {
+  background: color-mix(in srgb, var(--sidebar-foreground) 10%, transparent);
+}
+
+.tab-search-clear > span {
+  position: relative;
+  inline-size: 12px;
+  block-size: 12px;
+}
+
+.tab-search-clear > span::before,
+.tab-search-clear > span::after {
+  position: absolute;
+  inset-block-start: 5px;
+  inset-inline-start: 1px;
+  inline-size: 10px;
+  block-size: 2px;
+  border-radius: 1px;
+  background: currentColor;
+  content: "";
+  transform: rotate(45deg);
+}
+
+.tab-search-clear > span::after {
+  transform: rotate(-45deg);
+}
+
+.tab-search-scope {
+  padding-inline: 5px;
+}
+
+.tab-search-toggle:focus-visible,
+.tab-search-input:focus-visible,
+.tab-search-scope:focus-visible,
+.tab-search-clear:focus-visible,
+.tab-search-result:focus-visible {
+  outline: 2px solid var(--sidebar-accent);
+  outline-offset: -1px;
+}
+
+.tab-scroll {
+  grid-row: 2;
+  min-block-size: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.tab-pane[data-tab-search-position="bottom"] .tab-scroll {
+  grid-row: 1;
+}
+
+.tab-list {
+  min-block-size: 0;
+  padding: 4px 4px 0;
+}
+
+.tab-search-results {
+  display: flex;
+  min-block-size: 100%;
+  padding: 4px;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tab-search-results[hidden] {
+  display: none;
+}
+
+.tab-search-result {
+  display: grid;
+  min-block-size: var(--tab-row-size);
+  min-inline-size: 0;
+  padding: 4px 6px;
+  grid-template-columns: 24px var(--tab-favicon-size) minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 7px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: start;
+}
+
+.tab-search-result:hover {
+  border-color: color-mix(in srgb, var(--sidebar-border-color) 34%, transparent);
+  background: color-mix(in srgb, var(--sidebar-foreground) 8%, transparent);
+}
+
+.tab-search-result-workspace {
+  position: relative;
+  display: grid;
+  grid-column: 1;
+  inline-size: 22px;
+  block-size: 22px;
+  grid-row: 1 / 3;
+  place-items: center;
+}
+
+.tab-search-result > .tab-favicon {
+  grid-column: 2;
+  grid-row: 1 / 3;
+}
+
+.tab-search-result-workspace::before {
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: var(--workspace-glow-color, transparent);
+  content: "";
+  filter: blur(5px);
+  opacity: 0;
+}
+
+.tab-search-result-workspace .workspace-icon {
+  inline-size: 18px;
+  block-size: 18px;
+}
+
+.tab-search-result-workspace[data-glow="true"]::before {
+  opacity: 0.88;
+}
+
+.tab-search-result-title,
+.tab-search-result-context {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tab-search-result-title {
+  grid-column: 3;
+  font-size: var(--tab-label-font-size);
+  font-weight: 600;
+}
+
+.tab-search-result-context {
+  grid-column: 3 / 5;
+  color: color-mix(in srgb, var(--sidebar-foreground) 66%, transparent);
+  font-size: 0.72rem;
+}
+
+.tab-search-result-state {
+  grid-column: 4;
+  grid-row: 1;
+  color: color-mix(in srgb, var(--sidebar-foreground) 62%, transparent);
+  font-size: 0.7rem;
+}
+
+.tab-search-empty {
+  padding: 20px 12px;
+  margin: 0;
+  color: color-mix(in srgb, var(--sidebar-foreground) 68%, transparent);
+  text-align: center;
+}
+
+@container tab-pane (max-width: 17em) {
+  .tab-search-controls {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tab-search-scope {
+    inline-size: 100%;
+  }
+
+  .tab-search-result-state {
+    display: none;
+  }
+
+  .tab-search-result-context {
+    grid-column-end: 4;
+  }
+}
+
+@media (forced-colors: active) {
+  .tab-search,
+  .tab-search-input,
+  .tab-search-scope,
+  .tab-search-result {
+    border-color: ButtonText;
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  .tab-search-toggle {
+    background: ButtonFace;
+    color: ButtonText;
+  }
+
+  .tab-search-toggle-icon {
+    background: ButtonText;
+  }
+
+  .tab-search-toggle:hover,
+  .tab-search-toggle[aria-expanded="true"],
+  .tab-search-clear:hover,
+  .tab-search-result:hover {
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  .tab-search-result-workspace::before {
+    display: none;
+  }
+
+  .tab-search-result-context,
+  .tab-search-result-state,
+  .tab-search-empty {
+    color: GrayText;
+  }
+}
+
+.tab-list[data-empty="true"] .tab-zone {
+  min-block-size: 0;
+}
+
+.tab-zone {
+  display: flex;
+  min-block-size: 24px;
+  flex-direction: column;
+  gap: 2px;
+  border-radius: 6px;
+}
+
+.tab-zone--pinned:not(:has(.tab-row)) {
+  min-block-size: 0;
+}
+
+.tab-zone--pinned:has(.tab-row) {
+  margin-block-end: 5px;
+  padding-block-end: 5px;
+  border-block-end: 1px solid color-mix(in srgb, var(--sidebar-border-color) 18%, transparent);
+}
+
+.tab-zone-title {
+  overflow: hidden;
+  margin: 3px 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--sidebar-foreground) 72%, transparent);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.tab-zone--pinned:not(:has(.tab-row)) .tab-zone-title {
+  display: none;
+}
+
+.tab-row,
+.tab-group-header {
+  position: relative;
+  display: grid;
+  min-block-size: var(--tab-row-size);
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: inherit;
+  cursor: default;
+  font-size: var(--tab-label-font-size);
+}
+
+.tab-row {
+  grid-template-columns:
+    var(--tab-disclosure-size)
+    var(--tab-favicon-size)
+    minmax(0, 1fr)
+    var(--tab-disclosure-size)
+    var(--tab-status-width)
+    var(--tab-control-size);
+  gap: 4px;
+  padding-block: 3px;
+  padding-inline:
+    calc(var(--tab-row-inset, 4px) + var(--tree-depth) * var(--row-indent-step, var(--tree-indent-size, 16px)))
+    2px;
+}
+
+/* One nesting step for every row in the pane: the preset's indent while there
+   is room, narrower as the pane narrows. It never depends on a row's own depth,
+   so a parent's and a child's drawn branch lines still meet. */
+:root:not([data-content-mode="icons"]) .tab-row {
+  --row-indent-step: min(var(--tree-indent-size, 16px), 7cqi);
+}
+
+/* Explicit placement lets a count badge share the icon cell. */
+.tab-row > .tab-favicon,
+.tab-group-header > .group-icon {
+  grid-row: 1;
+  grid-column: 2;
+}
+
+/* A drawn branch: one column per ancestor, then a connector that points at the
+   tab. A trunk column carries the line past this row because a sibling still
+   follows below it; a finished branch leaves its column empty rather than
+   trailing a line to nowhere. Cells overlap the 2px row gap so the trunks of
+   consecutive rows join into one continuous line. */
+.tree-branch {
+  position: absolute;
+  z-index: 0;
+  display: flex;
+  /* Covers the 2px row gap at both ends, so 50% stays the row's true centre. */
+  inset-block: -2px;
+  inset-inline-start: var(--tab-row-inset, 4px);
+  pointer-events: none;
+}
+
+.tree-branch-cell {
+  position: relative;
+  inline-size: var(--row-indent-step, var(--tree-indent-size, 16px));
+}
+
+/* Trunk and tee run the full height; an elbow stops at the arm. */
+.tree-branch-cell[data-shape="trunk"]::before,
+.tree-branch-cell[data-shape="tee"]::before,
+.tree-branch-cell[data-shape="elbow"]::before {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: calc(var(--tab-disclosure-size) / 2);
+  inline-size: 1px;
+  background: var(--tree-guide-color);
+  content: "";
+}
+
+.tree-branch-cell[data-shape="trunk"]::before,
+.tree-branch-cell[data-shape="tee"]::before {
+  inset-block-end: 0;
+}
+
+.tree-branch-cell[data-shape="elbow"]::before {
+  block-size: 50%;
+}
+
+/* The arm starts under the parent's disclosure and ends under this row's own,
+   so it points at the tab rather than stopping short in the indent. Both ends
+   sit half a disclosure into their column, which makes the arm exactly one
+   indent step wide. */
+.tree-branch-cell[data-shape="tee"]::after,
+.tree-branch-cell[data-shape="elbow"]::after {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: calc(var(--tab-disclosure-size) / 2);
+  inline-size: 100%;
+  block-size: 1px;
+  background: var(--tree-guide-color);
+  content: "";
+}
+
+.tab-row--split {
+  grid-template-columns:
+    var(--tab-disclosure-size)
+    var(--tab-favicon-size)
+    var(--tab-disclosure-size)
+    minmax(0, 1fr)
+    var(--tab-disclosure-size)
+    var(--tab-status-width)
+    var(--tab-control-size);
+}
+
+.tab-container-marker {
+  inline-size: var(--tab-disclosure-size);
+  block-size: var(--tab-disclosure-size);
+  justify-self: center;
+  background: var(--tab-container-color, currentColor);
+  mask: url("../assets/icons/star.svg") center / contain no-repeat;
+}
+
+.tab-container-marker[data-load-state="loaded"] {
+  mask-image: url("../assets/icons/star-filled.svg");
+}
+
+.tab-container-marker[data-load-state="unloaded"] {
+  mask-image: url("../assets/icons/star.svg");
+}
+
+.tab-container-marker[data-status="unavailable"] {
+  opacity: 0.52;
+}
+
+.tab-footer {
+  position: relative;
+  display: flex;
+  min-block-size: var(--sidebar-footer-size);
+  padding: 4px;
+  align-items: stretch;
+  gap: 4px;
+  grid-row: 3;
+}
+
+.undo-sidebar-button {
+  display: flex;
+  flex: 0 1 45%;
+  min-inline-size: var(--tab-control-size);
+  max-inline-size: 14rem;
+  padding: 0 8px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--sidebar-accent) 15%, transparent);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--tab-label-font-size);
+  font-weight: 600;
+}
+
+.undo-sidebar-button[hidden] {
+  display: none;
+}
+
+.undo-sidebar-icon {
+  flex: none;
+  inline-size: var(--tab-disclosure-size);
+  block-size: var(--tab-disclosure-size);
+  background: currentColor;
+  mask: url("../assets/icons/undo.svg") center / contain no-repeat;
+}
+
+.undo-sidebar-button[data-action="redo"] .undo-sidebar-icon {
+  transform: scaleX(-1);
+}
+
+.undo-sidebar-label {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.undo-sidebar-button:hover {
+  background: color-mix(in srgb, var(--sidebar-accent) 24%, transparent);
+}
+
+.undo-sidebar-button:focus-visible {
+  outline: 2px solid var(--sidebar-accent);
+  outline-offset: 1px;
+}
+
+/* New tab always sits in the footer, below the continuous divider. */
+.new-tab-slot {
+  display: flex;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.new-tab-button {
+  display: flex;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  padding: 0 8px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 0;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--sidebar-foreground) 8%, transparent);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--tab-label-font-size);
+  font-weight: 600;
+}
+
+.new-tab-icon {
+  flex: none;
+  inline-size: var(--tab-disclosure-size);
+  block-size: var(--tab-disclosure-size);
+  background: currentColor;
+  mask: url("../assets/icons/plus-thin.svg") center / contain no-repeat;
+}
+
+.new-tab-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.new-tab-button:hover {
+  background: color-mix(in srgb, var(--sidebar-foreground) 14%, transparent);
+}
+
+.new-tab-button:focus-visible {
+  outline: 2px solid var(--sidebar-accent);
+  outline-offset: 1px;
+}
+
+.tab-row:hover,
+.tab-group-header:hover {
+  background: color-mix(in srgb, var(--sidebar-foreground) 8%, transparent);
+}
+
+.tab-row[aria-current="page"] {
+  background: color-mix(in srgb, var(--sidebar-active-tab-highlight) 17%, transparent);
+  border-color: color-mix(in srgb, var(--sidebar-active-tab-highlight) 38%, transparent);
+}
+
+.tab-row[aria-selected="true"] {
+  box-shadow: inset 3px 0 var(--sidebar-accent);
+}
+
+.tab-row:focus-visible,
+.tab-group-header:focus-visible,
+.tab-disclosure:focus-visible,
+.tab-menu-button:focus-visible,
+.group-menu-button:focus-visible {
+  outline: 2px solid var(--sidebar-accent);
+  outline-offset: -2px;
+}
+
+.tab-disclosure,
+.tab-menu-button,
+.group-menu-button {
+  display: grid;
+  min-inline-size: var(--tab-disclosure-size);
+  block-size: var(--tab-control-size);
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.tab-disclosure:disabled {
+  opacity: 0;
+}
+
+.tab-menu-button,
+.group-menu-button {
+  min-inline-size: var(--tab-control-size);
+}
+
+.tab-menu-button:hover,
+.group-menu-button:hover,
+.tab-disclosure:not(:disabled):hover {
+  background: color-mix(in srgb, var(--sidebar-foreground) 12%, transparent);
+}
+
+.tab-favicon,
+.group-icon {
+  display: grid;
+  inline-size: var(--tab-favicon-size);
+  block-size: var(--tab-favicon-size);
+  place-items: center;
+  color: inherit;
+}
+
+.tab-favicon--fallback {
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--favicon-fallback-color, #4f5f79);
+  color: #fff;
+  font-size: max(9px, calc(var(--tab-favicon-size) * 0.58));
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+/* A real mark needs no letter tile behind it. */
+.tab-favicon--internal {
+  background: none;
+}
+
+.tab-favicon-image {
+  grid-area: 1 / 1;
+  inline-size: 100%;
+  block-size: 100%;
+  background: transparent;
+  object-fit: contain;
+}
+
+.group-icon::before {
+  inline-size: 100%;
+  block-size: 100%;
+  background: currentColor;
+  content: "";
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+}
+
+.group-icon::before {
+  mask-image: url("../assets/icons/favicon-group.svg");
+}
+
+/* The outline folder stays for fully unloaded groups; any loaded member fills it. */
+.group-icon[data-load-state="loaded"]::before {
+  mask-image: url("../assets/icons/favicon-group-filled.svg");
+}
+
+.tab-favicon--loaded {
+  background: transparent;
+  color: transparent;
+}
+
+@media (forced-colors: active) {
+  .tab-favicon--fallback {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  .tab-favicon--loaded {
+    border-color: transparent;
+  }
+}
+
+.tab-title,
+.group-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tab-audio-state {
+  font-size: max(10px, calc(var(--tab-label-font-size) * 0.75));
+  text-align: center;
+}
+
+.tab-load-state {
+  inline-size: max(9px, calc(var(--tab-disclosure-size) * 0.72));
+  block-size: max(9px, calc(var(--tab-disclosure-size) * 0.72));
+  justify-self: center;
+  border: 1px solid color-mix(in srgb, #000 62%, transparent);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 1px color-mix(in srgb, #fff 36%, transparent);
+}
+
+.tab-load-state[data-load-state="unloaded"] {
+  border: 1px dashed color-mix(in srgb, var(--sidebar-foreground) 68%, transparent);
+  background: color-mix(in srgb, var(--sidebar-foreground) 22%, var(--sidebar-surface-color));
+  box-shadow: none;
+  opacity: 0.68;
+}
+
+:root[data-content-mode="full"] .tab-load-state {
+  position: static;
+  inset: auto;
+}
+
+.tab-split-indicator {
+  display: none;
+}
+
+.tab-row--split .tab-split-indicator {
+  position: relative;
+  display: block;
+  inline-size: var(--tab-disclosure-size);
+  block-size: max(9px, calc(var(--tab-disclosure-size) * 0.78));
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  opacity: 0.72;
+}
+
+.tab-split-indicator::after {
+  position: absolute;
+  inset-block: 1px;
+  inset-inline-start: 50%;
+  border-inline-start: 1px solid currentColor;
+  content: "";
+}
+
+.tab-row[data-split-position="start"] .tab-split-indicator {
+  border-inline-start-width: 3px;
+}
+
+.tab-row[data-split-position="end"] .tab-split-indicator {
+  border-inline-end-width: 3px;
+}
+
+/* A group is marked by a line in its Firefox color that runs from just below
+   the header, centered under the folder, to the bottom of its last member.
+   Members start right of the line. */
+.tab-group {
+  --group-line-start: calc(10px + var(--tab-disclosure-size) + var(--tab-favicon-size) / 2);
+  --tab-row-inset: calc(var(--group-line-start) + 5px);
+  --group-line-width: max(2px, calc(var(--tab-favicon-size) / 10));
+  /* Members hang off the group's own line, so their branch is drawn in the
+     group's color rather than the neutral guide color. */
+  --tree-guide-color: color-mix(in srgb, var(--group-color, var(--sidebar-accent)) 70%, transparent);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tab-group:has(> .tab-row)::before {
+  position: absolute;
+  inset-block: calc(var(--tab-row-size) + 2px) 0;
+  inset-inline-start: var(--group-line-start);
+  inline-size: var(--group-line-width);
+  border-radius: var(--group-line-width);
+  background: var(--group-color, var(--sidebar-accent));
+  content: "";
+  pointer-events: none;
+}
+
+/* The folder carries the group color too, so a collapsed group stays
+   identifiable when its line is not drawn. The header is tinted rather than
+   bordered: the group line is aligned to the folder's centre, and a border
+   would shift the folder out from under it. */
+.group-icon {
+  color: var(--group-color, var(--sidebar-accent));
+}
+
+/* Tinting the header rather than bordering it keeps the folder centred over
+   the group line; a border would shift it. Hover is restated because this
+   tint is declared after the shared hover rule. */
+.tab-group-header {
+  background: color-mix(in srgb, var(--group-color, var(--sidebar-accent)) 9%, transparent);
+}
+
+.tab-group-header:hover {
+  background: color-mix(in srgb, var(--group-color, var(--sidebar-accent)) 20%, transparent);
+}
+
+.tab-group-header {
+  grid-template-columns:
+    var(--tab-disclosure-size)
+    var(--tab-favicon-size)
+    minmax(0, 1fr)
+    var(--tab-status-width)
+    var(--tab-control-size);
+  gap: 4px;
+  padding-inline: 6px 2px;
+  font-weight: 600;
+}
+
+.group-menu-button {
+  grid-column: 5;
+}
+
+.drop-before::before,
+.drop-after::after {
+  position: absolute;
+  z-index: 2;
+  inset-inline: 2px;
+  block-size: 3px;
+  border-radius: 2px;
+  background: var(--sidebar-accent);
+  content: "";
+}
+
+.drop-before::before {
+  inset-block-start: -2px;
+}
+
+.drop-after::after {
+  inset-block-end: -2px;
+}
+
+.drop-inside {
+  outline: 2px dashed var(--sidebar-accent);
+  outline-offset: -3px;
+}
+
+.command-menu {
+  position: fixed;
+  z-index: 20;
+  display: grid;
+  inline-size: min(13rem, calc(100vw - 8px));
+  max-block-size: min(70vh, 28rem);
+  max-inline-size: calc(100vw - 8px);
+  min-inline-size: 0;
+  padding: 4px;
+  overflow: auto;
+  border: 1px solid color-mix(in srgb, var(--sidebar-border-color) 30%, transparent);
+  border-radius: 7px;
+  background: var(--sidebar-surface-color);
+  box-shadow: 0 8px 24px color-mix(in srgb, #000 30%, transparent);
+}
+
+.command-menu[hidden] {
+  display: none;
+}
+
+.command-menu-item {
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  overflow-wrap: anywhere;
+  text-align: start;
+  white-space: normal;
+}
+
+.command-menu-item:hover,
+.command-menu-item:focus-visible {
+  background: color-mix(in srgb, var(--sidebar-accent) 18%, transparent);
+  outline: none;
+}
+
+.command-menu-item[data-variant="danger"] {
+  color: var(--sidebar-danger);
+  font-weight: 650;
+}
+
+.command-menu-item[data-variant="danger"]:hover,
+.command-menu-item[data-variant="danger"]:focus-visible {
+  background: color-mix(in srgb, var(--sidebar-danger) 16%, transparent);
+}
+
+.command-menu-item:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.command-menu-separator {
+  block-size: 1px;
+  margin: 4px 5px;
+  background: color-mix(in srgb, var(--sidebar-border-color) 26%, transparent);
+}
+
+.workspace-dialog {
+  inline-size: min(22rem, calc(100vw - 24px));
+  max-inline-size: calc(100vw - 24px);
+  border: 1px solid color-mix(in srgb, var(--sidebar-border-color) 35%, transparent);
+  border-radius: 8px;
+  background: var(--sidebar-surface-color);
+  color: var(--sidebar-foreground);
+}
+
+.workspace-dialog::backdrop {
+  background: rgb(0 0 0 / 35%);
+}
+
+.workspace-dialog form {
+  display: grid;
+  gap: 12px;
+}
+
+.workspace-dialog h2,
+.workspace-dialog p {
+  margin: 0;
+}
+
+.workspace-dialog .dialog-warning {
+  padding: 8px 10px;
+  border-inline-start: 3px solid Mark;
+  background: color-mix(in srgb, Mark 10%, transparent);
+}
+
+.workspace-dialog label {
+  display: grid;
+  gap: 5px;
+}
+
+.workspace-dialog .dialog-preference {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.workspace-dialog .dialog-preference input {
+  flex: none;
+  min-inline-size: 16px;
+  inline-size: 16px;
+  block-size: 16px;
+  padding: 0;
+  margin-block-start: 3px;
+}
+
+.workspace-dialog input {
+  min-inline-size: 0;
+  padding: 7px 8px;
+  border: 1px solid color-mix(in srgb, var(--sidebar-border-color) 35%, transparent);
+  border-radius: 5px;
+  background: var(--sidebar-background);
+  color: inherit;
+  font: inherit;
+}
+
+.container-move-choices {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.container-move-list {
+  display: grid;
+  gap: 2px;
+  max-block-size: min(18rem, 50vh);
+  overflow-y: auto;
+}
+
+.workspace-dialog .container-move-choice {
+  display: grid;
+  grid-template-columns: 16px 14px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px;
+  border-radius: 5px;
+}
+
+.workspace-dialog .container-move-choice input {
+  inline-size: 16px;
+  block-size: 16px;
+  margin: 0;
+  padding: 0;
+}
+
+.container-move-choice:has(input:disabled) {
+  opacity: 0.6;
+}
+
+.container-move-star {
+  inline-size: 14px;
+  block-size: 14px;
+  background: var(--tab-container-color, currentColor);
+  mask: url("../assets/icons/star-filled.svg") center / contain no-repeat;
+}
+
+.container-move-star[data-empty="true"] {
+  visibility: hidden;
+}
+
+.container-move-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.container-move-current {
+  font-size: 0.85em;
+  opacity: 0.8;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.dialog-actions button {
+  padding: 7px 10px;
+  border: 1px solid color-mix(in srgb, var(--sidebar-border-color) 32%, transparent);
+  border-radius: 5px;
+  background: var(--sidebar-background);
+  color: inherit;
+  font: inherit;
+}
+
+.dialog-actions .danger-button {
+  border-color: color-mix(in srgb, var(--sidebar-danger) 70%, transparent);
+  color: var(--sidebar-danger);
+}
+
+.rail-action {
+  display: grid;
+  inline-size: var(--workspace-button-size);
+  block-size: var(--workspace-button-size);
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--sidebar-foreground);
+  cursor: pointer;
+}
+
+.rail-action:hover {
+  background: color-mix(in srgb, var(--sidebar-foreground) 10%, transparent);
+}
+
+.rail-action:focus-visible {
+  outline: 2px solid var(--sidebar-accent);
+  outline-offset: 1px;
+}
+
+.rail-action:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.rail-action-icon-box {
+  display: grid;
+  inline-size: clamp(20px, calc(var(--workspace-icon-size) * 0.56), 28px);
+  block-size: clamp(20px, calc(var(--workspace-icon-size) * 0.56), 28px);
+  place-items: center;
+}
+
+.rail-action-icon {
+  inline-size: 100%;
+  block-size: 100%;
+  background: currentColor;
+  mask: var(--rail-action-mask) center / contain no-repeat;
+  transform: scale(var(--rail-action-optical-scale, 1));
+  transform-origin: center;
+}
+
+.rail-action-icon--settings {
+  --rail-action-mask: url("../assets/icons/settings.svg");
+  --rail-action-optical-scale: 0.93;
+}
+
+.workspace-status {
+  max-inline-size: 20rem;
+  margin: 8px;
+  padding: 8px;
+}
+
+.workspace-status--error {
+  border: 1px solid Mark;
+  border-radius: 6px;
+  background: color-mix(in srgb, Mark 16%, Canvas);
+  color: CanvasText;
+}
+
+.workspace-status--warning {
+  border: 1px solid color-mix(in srgb, #b45309 70%, CanvasText);
+  border-radius: 6px;
+  background: color-mix(in srgb, #f59e0b 16%, Canvas);
+  color: CanvasText;
+}
+
+[data-content-mode="icons"] .workspace-navigation {
+  display: grid;
+  flex: 0 0 var(--workspace-rail-size);
+  inline-size: var(--workspace-rail-size);
+  visibility: visible;
+}
+
+[data-content-mode="icons"] .workspace-icon-box {
+  display: grid;
+  visibility: visible;
+}
+
+[data-content-mode="icons"] .workspace-icon {
+  display: block;
+  visibility: visible;
+}
+
+[data-content-mode="icons"] .workspace-tab-count {
+  display: grid;
+}
+
+[data-content-mode="icons"] .workspace-menu-button {
+  display: none;
+}
+
+[data-content-mode="icons"] .tab-pane {
+  flex: 0 0 var(--tab-icon-pane-size);
+  inline-size: var(--tab-icon-pane-size);
+  min-inline-size: var(--tab-icon-pane-size);
+  max-inline-size: var(--tab-icon-pane-size);
+}
+
+/* Closed, the magnifier sits in the icon column like the footer controls. The
+   compact pane cannot hold an input, so an open search lays the same tab pane
+   over the whole sidebar document instead of widening the icon column. */
+[data-content-mode="icons"] .tab-search {
+  inline-size: var(--tab-icon-column-size);
+  padding-inline: 0;
+  justify-content: center;
+}
+
+[data-content-mode="icons"] .tab-pane[data-tab-search-open="true"] {
+  position: absolute;
+  z-index: 30;
+  inset: 0;
+  flex: none;
+  inline-size: auto;
+  min-inline-size: 0;
+  max-inline-size: none;
+  grid-template-rows: auto minmax(0, 1fr);
+  background-color: var(--sidebar-background);
+  background-image: var(--sidebar-background-image);
+  background-position: var(--sidebar-background-position);
+  background-repeat: var(--sidebar-background-repeat);
+  background-size: var(--sidebar-background-size);
+}
+
+[data-content-mode="icons"] .tab-pane[data-tab-search-open="true"][data-tab-search-position="bottom"] {
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
+[data-content-mode="icons"] .tab-pane[data-tab-search-open="true"] .tab-search {
+  inline-size: auto;
+  padding-inline: 4px 6px;
+  justify-content: stretch;
+}
+
+[data-content-mode="icons"] .tab-pane[data-tab-search-open="true"] .tab-list,
+[data-content-mode="icons"] .tab-pane[data-tab-search-open="true"] .tab-footer {
+  display: none;
+}
+
+/* A long tab list creates a vertical scrollbar. Reserve that scrollbar from
+   the start so it never steals the tile gutter or changes the compact pane's
+   intrinsic width after the list begins overflowing. */
+[data-content-mode="icons"] .tab-scroll {
+  min-inline-size: 0;
+  inline-size: 100%;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+}
+
+[data-content-mode="icons"] .tab-zone-title,
+[data-content-mode="icons"] .tab-title,
+[data-content-mode="icons"] .group-title {
+  display: none;
+}
+
+[data-content-mode="icons"] .workspace-status {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+[data-content-mode="icons"] .tab-list {
+  min-inline-size: 0;
+  inline-size: 100%;
+  padding-inline: 4px;
+}
+
+[data-content-mode="icons"] .tab-footer {
+  inline-size: var(--tab-icon-column-size);
+  padding-inline: 3px;
+  justify-content: center;
+  gap: 2px;
+}
+
+[data-content-mode="icons"] .undo-sidebar-label,
+[data-content-mode="icons"] .new-tab-label {
+  display: none;
+}
+
+[data-content-mode="icons"] .undo-sidebar-button,
+[data-content-mode="icons"] .new-tab-button {
+  flex: none;
+  inline-size: var(--tab-control-size);
+  block-size: var(--tab-control-size);
+  padding: 0;
+  align-self: center;
+}
+
+[data-content-mode="icons"] .undo-sidebar-button:not([hidden]) {
+  inline-size: 18px;
+  min-inline-size: 18px;
+}
+
+[data-content-mode="icons"] .undo-sidebar-button:not([hidden]) ~ .new-tab-slot {
+  flex: 0 1 auto;
+  min-inline-size: 18px;
+}
+
+[data-content-mode="icons"] .undo-sidebar-button:not([hidden]) ~ .new-tab-slot .new-tab-button {
+  inline-size: 18px;
+  min-inline-size: 18px;
+}
+
+[data-content-mode="icons"] .undo-sidebar-button:not([hidden]) .undo-sidebar-icon,
+[data-content-mode="icons"] .undo-sidebar-button:not([hidden]) ~ .new-tab-slot .new-tab-icon {
+  inline-size: 14px;
+  block-size: 14px;
+  font-size: 14px;
+}
+
+[data-content-mode="icons"] .tab-zone,
+[data-content-mode="icons"] .tab-group {
+  align-items: center;
+}
+
+/* Icons Only does not indent, so there is nowhere to draw a branch. The group
+   line moves beside the member tiles and becomes the only depth cue, which is
+   why it keeps the group's color here too. */
+[data-content-mode="icons"] .tab-group:has(> .tab-row)::before {
+  inset-block-start: calc(var(--tab-tile-size) + 2px);
+  inset-inline-start: calc(var(--group-line-width) * -1 - 1px);
+}
+
+[data-content-mode="icons"] .tree-branch {
+  display: none;
+}
+
+/* Icons Only gives counted rows a line below the tile,
+   clear of disclosures, audio, split state, stars, favicons, and focus. */
+[data-content-mode="icons"] .tab-row[data-has-count="true"],
+[data-content-mode="icons"] .tab-group-header[data-has-count="true"] {
+  min-block-size: calc(var(--tab-tile-size) + var(--tab-count-line-size));
+}
+
+[data-content-mode="icons"] .tab-count-badge {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  block-size: var(--tab-count-line-size);
+  font-size: min(var(--tab-count-font-size), 12px);
+  line-height: var(--tab-count-line-size);
+}
+
+[data-content-mode="icons"] .tab-status-owner {
+  display: contents;
+}
+
+[data-content-mode="icons"] .tab-row,
+[data-content-mode="icons"] .tab-group-header {
+  inline-size: var(--tab-tile-size);
+  min-block-size: var(--tab-tile-size);
+  padding: 0;
+  grid-template-columns: 1fr;
+  place-items: center;
+}
+
+[data-content-mode="icons"] .tab-row {
+  padding-inline: 0;
+}
+
+[data-content-mode="icons"] .tab-favicon,
+[data-content-mode="icons"] .group-icon {
+  grid-area: 1 / 1;
+  inline-size: var(--tab-favicon-size);
+  block-size: var(--tab-favicon-size);
+}
+
+[data-content-mode="icons"] [data-has-count="true"] > .tab-favicon,
+[data-content-mode="icons"] [data-has-count="true"] > .group-icon {
+  position: absolute;
+  inset-block-start: calc((var(--tab-tile-size) - var(--tab-favicon-size)) / 2);
+}
+
+[data-content-mode="icons"] .tab-disclosure,
+[data-content-mode="icons"] .group-disclosure {
+  position: absolute;
+  z-index: 2;
+  inset-inline-start: 0;
+  inset-block-start: 0;
+  inline-size: 8px;
+  min-inline-size: 8px;
+  block-size: 8px;
+  font-size: 9px;
+  line-height: 8px;
+}
+
+[data-content-mode="icons"] .tab-audio-state {
+  position: absolute;
+  inset-inline-end: 2px;
+  inset-block-start: 1px;
+  font-size: max(9px, calc(var(--tab-disclosure-size) * 0.7));
+}
+
+[data-content-mode="icons"] .tab-container-marker {
+  position: absolute;
+  z-index: 3;
+  inset-inline-end: 3px;
+  inset-block-end: 3px;
+  inline-size: max(9px, calc(var(--tab-disclosure-size) * 0.72));
+  block-size: max(9px, calc(var(--tab-disclosure-size) * 0.72));
+}
+
+[data-content-mode="icons"] .tab-container-marker[data-status="unavailable"] {
+  opacity: 0.52;
+}
+
+[data-content-mode="icons"] [data-has-count="true"] .tab-container-marker {
+  inset-block-end: calc(var(--tab-count-line-size) + 3px);
+}
+
+[data-content-mode="icons"] .tab-load-state {
+  position: absolute;
+  z-index: 3;
+  inset-inline-end: 3px;
+  inset-block-end: 3px;
+}
+
+[data-content-mode="icons"] .tab-split-indicator {
+  position: absolute;
+  inset-inline-start: 2px;
+  inset-block-end: 2px;
+  inline-size: var(--tab-disclosure-size);
+  block-size: max(8px, calc(var(--tab-disclosure-size) * 0.78));
+}
+
+[data-content-mode="icons"] [data-has-count="true"] .tab-split-indicator {
+  inset-block-end: calc(var(--tab-count-line-size) + 2px);
+}
+
+[data-content-mode="icons"] .tab-menu-button,
+[data-content-mode="icons"] .group-menu-button {
+  display: none;
+}
+
+:root[data-action-buttons="hidden"] .workspace-menu-button,
+:root[data-action-buttons="hidden"] .tab-menu-button,
+:root[data-action-buttons="hidden"] .group-menu-button {
+  display: none;
+}
+
+:root[data-action-buttons="hidden"]:not([data-content-mode="icons"]) .tab-row {
+  grid-template-columns:
+    var(--tab-disclosure-size)
+    var(--tab-favicon-size)
+    minmax(0, 1fr)
+    var(--tab-disclosure-size)
+    var(--tab-status-width);
+}
+
+:root[data-action-buttons="hidden"]:not([data-content-mode="icons"]) .tab-row--split {
+  grid-template-columns:
+    var(--tab-disclosure-size)
+    var(--tab-favicon-size)
+    var(--tab-disclosure-size)
+    minmax(0, 1fr)
+    var(--tab-disclosure-size)
+    var(--tab-status-width);
+}
+
+:root[data-action-buttons="hidden"]:not([data-content-mode="icons"]) .tab-group-header {
+  grid-template-columns:
+    var(--tab-disclosure-size)
+    var(--tab-favicon-size)
+    minmax(0, 1fr)
+    var(--tab-status-width);
+}
+
+/* A Full Labels row has about 11em of fixed columns plus tree indentation, and
+   Firefox lets the sidebar be dragged far narrower. Thresholds are in em, which
+   container queries resolve against the pane's font, so every size preset
+   compacts at the same proportions. Rows give way in stages instead of pushing
+   titles and indicators out of view: first the ... button leaves (right-click
+   and the Context Menu key still open every action) and the reserved status and
+   audio cells shrink to what each row shows, then spacing and group insets
+   tighten, then the audio note and footer labels leave. Indicators stay
+   right-aligned at the row's end, so they still line up down the list. */
+@container tab-pane (max-width: 16em) {
+  :root:not([data-content-mode="icons"]) .tab-menu-button,
+  :root:not([data-content-mode="icons"]) .group-menu-button {
+    display: none;
+  }
+
+  :root:not([data-content-mode="icons"]) .tab-row {
+    grid-template-columns:
+      var(--tab-disclosure-size)
+      var(--tab-favicon-size)
+      minmax(0, 1fr)
+      auto
+      auto;
+  }
+
+  :root:not([data-content-mode="icons"]) .tab-row--split {
+    grid-template-columns:
+      var(--tab-disclosure-size)
+      var(--tab-favicon-size)
+      var(--tab-disclosure-size)
+      minmax(0, 1fr)
+      auto
+      auto;
+  }
+
+  :root:not([data-content-mode="icons"]) .tab-group-header {
+    grid-template-columns:
+      var(--tab-disclosure-size)
+      var(--tab-favicon-size)
+      minmax(0, 1fr)
+      auto;
+  }
+}
+
+@container tab-pane (max-width: 13em) {
+  :root:not([data-content-mode="icons"]) .tab-row {
+    gap: 3px;
+  }
+
+  :root:not([data-content-mode="icons"]) .tab-group-header {
+    gap: 3px;
+    padding-inline: 3px 2px;
+  }
+
+  :root:not([data-content-mode="icons"]) .tab-group {
+    /* The header's 3px inset plus its 3px gap keep the line under the folder. */
+    --group-line-start: calc(6px + var(--tab-disclosure-size) + var(--tab-favicon-size) / 2);
+    --tab-row-inset: calc(var(--group-line-start) + 3px);
+  }
+
+  :root:not([data-content-mode="icons"]) .tab-list {
+    padding-inline: 2px;
+  }
+
+  :root:not([data-content-mode="icons"]) .tab-zone-title {
+    margin-inline: 4px;
+  }
+}
+
+@container tab-pane (max-width: 9em) {
+  /* The disclosure column, the branch lines centered on it, and the group line
+     all read this size, so narrowing it here keeps them aligned. */
+  :root:not([data-content-mode="icons"]) .tab-zone {
+    --tab-disclosure-size: clamp(10px, calc(var(--tab-favicon-size) * 0.4), 14px);
+  }
+
+  :root:not([data-content-mode="icons"]) .tab-audio-state {
+    display: none;
+  }
+
+  :root:not([data-content-mode="icons"]) .new-tab-label,
+  :root:not([data-content-mode="icons"]) .undo-sidebar-label {
+    display: none;
+  }
+
+  :root:not([data-content-mode="icons"]) .tab-footer {
+    gap: 2px;
+    padding-inline: 2px;
+  }
+
+  :root:not([data-content-mode="icons"]) .undo-sidebar-button,
+  :root:not([data-content-mode="icons"]) .new-tab-button {
+    padding-inline: 0;
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace-icon,
+  .workspace-icon-box {
+    transition: none;
+    animation: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .tab-group:has(> .tab-row)::before {
+    background: CanvasText;
+  }
+
+  /* Forced colors drops the group tint, so the branch falls back to a system
+     color instead of a color-mix of one that is no longer painted. */
+  .tab-group,
+  .tab-zone {
+    --tree-guide-color: GrayText;
+  }
+
+  .group-icon {
+    color: CanvasText;
+  }
+
+  .tab-group-header {
+    background: Canvas;
+  }
+
+  .tab-group-header:hover {
+    background: Canvas;
+  }
+
+  .tab-group > .tab-row[aria-current="page"] {
+    border-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  .tab-group > .tab-row[aria-selected="true"] {
+    box-shadow: inset 3px 0 Highlight;
+  }
+
+  .workspace-add-button {
+    border-color: ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+  }
+
+  .workspace-entry {
+    border-color: ButtonText;
+    background: ButtonFace;
+  }
+
+  .rail-action {
+    border-color: ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+  }
+
+  .workspace-icon {
+    background: ButtonText;
+    filter: none !important;
+  }
+
+  .workspace-icon--image {
+    background: none;
+    forced-color-adjust: none;
+  }
+
+  .workspace-icon-box::before {
+    display: none;
+  }
+
+  .tab-container-marker,
+  .container-move-star {
+    background: ButtonText;
+  }
+
+  .workspace-container-unavailable,
+  .tab-load-state,
+  .tab-container-marker[data-status="unavailable"] {
+    border-color: ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+    opacity: 1;
+  }
+
+  .tab-load-state[data-load-state="loaded"] {
+    background: ButtonText;
+  }
+
+  .count-badge {
+    background: transparent;
+    box-shadow: none;
+    color: CanvasText;
+    text-shadow: none;
+  }
+
+  .count-badge[data-load-state="empty"],
+  .count-badge[data-load-state="unloaded"] {
+    color: GrayText;
+  }
+}

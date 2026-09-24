@@ -1,0 +1,12 @@
+<!--
+  Lucide Summary icon, user-supplied geometry.
+  Supplied/moved source SHA-256: 95e471411f10dcb59dd8ba051ea04738e6eea7aa7ff47ede8991a137b971aa71
+  Geometry verified against Lucide commit 5d592a96aaeb4a3a09ffd8134f8f5ed878c9a0c5:
+  https://github.com/lucide-icons/lucide/blob/5d592a96aaeb4a3a09ffd8134f8f5ed878c9a0c5/icons/summary.svg
+
+  ISC License
+  Copyright (c) 2026 Lucide Icons and Contributors
+  Feather-derived icons: MIT License, Copyright (c) 2013-present Cole Bemis
+  Full license: ../LICENSE.lucide.txt
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4H7"/><path d="m18 16 3 3-3 3"/><path d="M3 4v13a2 2 0 0 0 2 2h16"/><path d="M7 14h7"/><path d="M7 9h12"/></svg>
