@@ -2,6 +2,8 @@
 
 Terminus is a Firefox Desktop extension that keeps your tabs organized into workspaces, one for each part of your day. A narrow rail of workspace icons sits in Firefox's sidebar next to the current workspace's tabs, groups, and pins. Switching workspaces hides the other workspaces' tabs without closing them, and snapshots let you save and restore your whole setup. Terminus keeps its data in your Firefox profile and has no Terminus account, server, or cloud sync.
 
+![The Terminus sidebar: a rail of workspace icons beside the current workspace's tab search, pinned tab, tab groups, and nested tabs](docs/images/sidebar.png)
+
 ## Features
 
 ### Workspaces
@@ -89,6 +91,8 @@ Terminus is a Firefox Desktop extension that keeps your tabs organized into work
 - Exported files go to Downloads, in Snapshots & Settings, with names like "Terminus Snapshot - Sep 13, 2026 9.25 PM". Terminus reads a file's contents, not its name, so older exports still import.
 
 ### Restoring
+
+![The Snapshot Viewer showing a saved snapshot's workspaces and tabs, with buttons to open one window, all windows, or only the selected tabs](docs/images/snapshot-viewer.png)
 
 - Browse your saved snapshots in the Snapshot Viewer.
 - Restore everything, one window, or only the tabs you pick.
