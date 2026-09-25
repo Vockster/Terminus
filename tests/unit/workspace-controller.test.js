@@ -358,15 +358,16 @@ function createHarness(initialTabs, options = {}) {
       const source = tabs.find(({ id }) => id === tabId);
       if (!source) throw new Error("Missing source tab");
       const id = nextTabId++;
+      const index = Number.isInteger(createOptions.index) ? createOptions.index : source.index + 1;
       for (const existing of tabs.filter((entry) => entry.windowId === source.windowId)) {
         existing.active = false;
         existing.highlighted = false;
-        if (existing.index > source.index) existing.index += 1;
+        if (existing.index >= index) existing.index += 1;
       }
       const copied = {
         ...source,
         id,
-        index: source.index + 1,
+        index,
         active: true,
         highlighted: true,
         pinned: false,
@@ -1237,7 +1238,7 @@ test("copying into a container keeps the source and creates a loose adjacent tab
       splitViewId: -1
     }
   );
-  assert.deepEqual(harness.copiedTabOptions, [{ cookieStoreId: "firefox-container-2" }]);
+  assert.deepEqual(harness.copiedTabOptions, [{ cookieStoreId: "firefox-container-2", index: 1 }]);
   const layout = harness.getRuntime().windows[0].workspaceLayouts.find(
     ({ workspaceId }) => workspaceId === WORK_ID
   );
@@ -6856,4 +6857,108 @@ test("bookmark import refuses a private window, an empty pick, and a full rail b
   );
   assert.equal(fullHarness.getState().workspaces.length, 100);
   assert.equal(fullHarness.createdTabOptions.length, 0);
+});
+
+function branchRuntime(rows) {
+  return {
+    schemaVersion: 5,
+    tabs: rows.map(([id]) => ({ id: `tab-${id}`, workspaceId: WORK_ID })),
+    windows: [{
+      id: "window-7",
+      activeWorkspaceId: WORK_ID,
+      selectedTabs: [{ workspaceId: WORK_ID, tabId: `tab-${rows[0][0]}` }],
+      workspaceLayouts: [{
+        workspaceId: WORK_ID,
+        tabIds: rows.map(([id]) => `tab-${id}`),
+        pinnedTabIds: [],
+        groups: [],
+        tree: rows.map(([id, parent = null]) => ({
+          tabId: `tab-${id}`,
+          parentTabId: parent === null ? null : `tab-${parent}`,
+          collapsed: false
+        })),
+        splitViews: []
+      }],
+      pendingOperation: null
+    }]
+  };
+}
+
+function workTreeParents(harness) {
+  const layout = harness.getRuntime().windows[0].workspaceLayouts.find(
+    ({ workspaceId }) => workspaceId === WORK_ID
+  );
+  return layout.tree.map(({ tabId, parentTabId }) => [tabId, parentTabId]);
+}
+
+test("a new tab Firefox opens inside a branch joins that branch instead of splitting it", async () => {
+  const harness = createHarness(
+    [tab(11, 7, 0, true), tab(12, 7, 2, false), tab(13, 7, 3, false)],
+    { initialRuntime: branchRuntime([[11], [12, 11], [13, 11]]) }
+  );
+  await harness.controller.getView(7);
+  harness.addTab(tab(14, 7, 1, false));
+
+  await harness.controller.reconcileWindow(7);
+
+  assert.deepEqual(workTreeParents(harness), [
+    ["tab-11", null],
+    ["tab-14", "tab-11"],
+    ["tab-12", "tab-11"],
+    ["tab-13", "tab-11"]
+  ]);
+});
+
+test("an opener stays the parent only when Firefox places the new tab inside its branch", async () => {
+  const adjacent = createHarness(
+    [tab(11, 7, 0, true), tab(15, 7, 2, false)],
+    { initialRuntime: branchRuntime([[11], [15]]) }
+  );
+  await adjacent.controller.getView(7);
+  adjacent.addTab(tab(14, 7, 1, false, { openerTabId: 11 }));
+  await adjacent.controller.reconcileWindow(7);
+  assert.deepEqual(workTreeParents(adjacent), [
+    ["tab-11", null],
+    ["tab-14", "tab-11"],
+    ["tab-15", null]
+  ]);
+
+  const far = createHarness(
+    [tab(11, 7, 0, true), tab(12, 7, 1, false), tab(15, 7, 2, false)],
+    { initialRuntime: branchRuntime([[11], [12, 11], [15]]) }
+  );
+  await far.controller.getView(7);
+  far.addTab(tab(14, 7, 3, false, { openerTabId: 11 }));
+  await far.controller.reconcileWindow(7);
+  assert.deepEqual(workTreeParents(far), [
+    ["tab-11", null],
+    ["tab-12", "tab-11"],
+    ["tab-15", null],
+    ["tab-14", null]
+  ]);
+});
+
+test("copying a parent into a container places the copy after its whole branch", async () => {
+  const containerService = {
+    async resolve() { return "firefox-container-2"; },
+    presentationForCookieStore() { return { kind: "none" }; }
+  };
+  const harness = createHarness(
+    [
+      tab(11, 7, 0, true, { url: "https://example.com/" }),
+      tab(12, 7, 1, false, { url: "https://example.net/" }),
+      tab(13, 7, 2, false, { url: "https://example.org/" })
+    ],
+    { initialRuntime: branchRuntime([[11], [12, 11], [13]]), containerService }
+  );
+
+  await harness.controller.copyTabToContainer(7, 11, { kind: "container", refId: "ctr-personal" });
+
+  assert.deepEqual(harness.copiedTabOptions, [{ cookieStoreId: "firefox-container-2", index: 2 }]);
+  assert.deepEqual(workTreeParents(harness), [
+    ["tab-11", null],
+    ["tab-12", "tab-11"],
+    ["tab-14", null],
+    ["tab-13", null]
+  ]);
 });

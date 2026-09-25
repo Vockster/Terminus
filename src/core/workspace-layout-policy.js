@@ -70,33 +70,46 @@ function groupIdByTab(layout) {
   return result;
 }
 
-export function repairWorkspaceTree(layout) {
+// Keeps every branch contiguous in layout order: a tab's parent must be the
+// previous row or one of its ancestors. Row order is Firefox's, so a tab that
+// lands inside a branch is fitted to where it landed instead of splitting it.
+// The next row's parent is looked ahead so an arriving tab never cuts its
+// following siblings off from their parent. `preferredParents` carries opener
+// parents for tabs first seen in this pass and outranks their placeholder node.
+// Those tabs only fit themselves in; they never reshape the rows around them.
+export function repairWorkspaceTree(layout, { preferredParents = null } = {}) {
   const previous = Array.isArray(layout.tree) ? layout.tree : [];
   const previousByTabId = new Map(previous.map((node) => [node.tabId, node]));
   const pinned = new Set(layout.pinnedTabIds);
   const groupByTabId = groupIdByTab(layout);
-  const accepted = new Set();
-  const depthByTabId = new Map();
-  const tree = layout.tabIds.map((tabId) => {
+  const requestedParent = (tabId) =>
+    preferredParents?.has(tabId) ? null : previousByTabId.get(tabId)?.parentTabId ?? null;
+  const canParent = (tabId, parentTabId) =>
+    !pinned.has(tabId) &&
+    !pinned.has(parentTabId) &&
+    groupByTabId.get(tabId) === groupByTabId.get(parentTabId);
+  // Root-first ancestor chain of the previous row, ending with that row.
+  let openPath = [];
+  const tree = layout.tabIds.map((tabId, index) => {
     const oldNode = previousByTabId.get(tabId);
-    let parentTabId = oldNode?.parentTabId ?? null;
-    let depth = 0;
-    if (
-      pinned.has(tabId) ||
-      !accepted.has(parentTabId) ||
-      pinned.has(parentTabId) ||
-      groupByTabId.get(tabId) !== groupByTabId.get(parentTabId)
-    ) {
-      parentTabId = null;
-    } else {
-      depth = depthByTabId.get(parentTabId) + 1;
-      if (depth > MAX_TAB_TREE_DEPTH) {
-        parentTabId = null;
-        depth = 0;
-      }
-    }
-    accepted.add(tabId);
-    depthByTabId.set(tabId, depth);
+    const candidates = openPath.filter(
+      (ancestorId, depth) => depth < MAX_TAB_TREE_DEPTH && canParent(tabId, ancestorId)
+    );
+    const nextTabId = layout.tabIds[index + 1];
+    const nextParent = nextTabId === undefined ? null : requestedParent(nextTabId);
+    const floor = nextParent !== null && canParent(nextTabId, nextParent)
+      ? candidates.indexOf(nextParent)
+      : -1;
+    const allowed = floor >= 0 ? candidates.slice(floor) : [null, ...candidates];
+    const choices = [
+      preferredParents?.get(tabId),
+      oldNode?.parentTabId ?? null,
+      floor >= 0 ? candidates[floor] : null
+    ];
+    const parentTabId = choices.find(
+      (choice) => choice !== undefined && allowed.includes(choice)
+    ) ?? null;
+    openPath = [...openPath.slice(0, openPath.indexOf(parentTabId) + 1), tabId];
     return {
       tabId,
       parentTabId,
@@ -783,33 +796,51 @@ function removeTabsFromLayout(layout, tabIds) {
   return { movingNodes, movingSplitViews };
 }
 
+// Index just past the anchor's branch, including collapsed descendants.
+function branchEndIndex(layout, anchorIndex) {
+  const anchorTabId = layout.tabIds[anchorIndex];
+  const nodeById = new Map((layout.tree ?? []).map((node) => [node.tabId, node]));
+  let insertionIndex = anchorIndex + 1;
+  while (insertionIndex < layout.tabIds.length) {
+    let ancestorId = nodeById.get(layout.tabIds[insertionIndex])?.parentTabId ?? null;
+    while (ancestorId !== null && ancestorId !== anchorTabId) {
+      ancestorId = nodeById.get(ancestorId)?.parentTabId ?? null;
+    }
+    if (ancestorId === null) {
+      break;
+    }
+    insertionIndex += 1;
+  }
+  return insertionIndex;
+}
+
+// Tabs inserted at `insertionIndex` under `parentTabId` must keep every branch
+// contiguous: the parent is the previous row or one of its ancestors, and the
+// row that follows must still reach its own parent.
+function treeParentFitsAt(layout, insertionIndex, parentTabId) {
+  const nodeById = new Map((layout.tree ?? []).map((node) => [node.tabId, node]));
+  const openPath = [];
+  let ancestorId = layout.tabIds[insertionIndex - 1] ?? null;
+  while (ancestorId !== null) {
+    openPath.unshift(ancestorId);
+    ancestorId = nodeById.get(ancestorId)?.parentTabId ?? null;
+  }
+  const nextParent = nodeById.get(layout.tabIds[insertionIndex])?.parentTabId ?? null;
+  const floor = nextParent === null ? -1 : openPath.indexOf(nextParent);
+  const allowed = floor >= 0 ? openPath.slice(floor) : [null, ...openPath];
+  return allowed.includes(parentTabId);
+}
+
 function insertionIndexFor(layout, destination) {
   if (destination.anchorTabId !== null) {
     const anchorIndex = layout.tabIds.indexOf(destination.anchorTabId);
     if (anchorIndex < 0) {
       return -1;
     }
-    if (destination.relation === "inside") {
-      const nodeById = new Map((layout.tree ?? []).map((node) => [node.tabId, node]));
-      let insertionIndex = anchorIndex + 1;
-      while (insertionIndex < layout.tabIds.length) {
-        let ancestorId = nodeById.get(layout.tabIds[insertionIndex])?.parentTabId ?? null;
-        let belongsToBranch = false;
-        while (ancestorId !== null) {
-          if (ancestorId === destination.anchorTabId) {
-            belongsToBranch = true;
-            break;
-          }
-          ancestorId = nodeById.get(ancestorId)?.parentTabId ?? null;
-        }
-        if (!belongsToBranch) {
-          break;
-        }
-        insertionIndex += 1;
-      }
-      return insertionIndex;
+    if (destination.relation === "inside" || destination.relation === "after") {
+      return branchEndIndex(layout, anchorIndex);
     }
-    return anchorIndex + (destination.relation === "after" ? 1 : 0);
+    return anchorIndex;
   }
   if (destination.zone === "pinned") {
     return layout.pinnedTabIds.length;
@@ -1086,6 +1117,17 @@ export function relocateLogicalTabs({ runtime, windowRuntime, tabIds, destinatio
   if ((existingTarget?.splitViews ?? []).some((splitView) => movingSplitIds.has(splitView.id))) {
     return null;
   }
+  if (existingTarget && destination.zone !== "pinned") {
+    const remaining = {
+      ...existingTarget,
+      tabIds: existingTarget.tabIds.filter((tabId) => !movingSet.has(tabId)),
+      tree: (existingTarget.tree ?? []).filter((node) => !movingSet.has(node.tabId))
+    };
+    const probeIndex = insertionIndexFor(remaining, destination);
+    if (probeIndex < 0 || !treeParentFitsAt(remaining, probeIndex, destination.parentTabId)) {
+      return null;
+    }
+  }
 
   const originalNodes = new Map(
     (sourceLayout.tree ?? [])
@@ -1132,6 +1174,13 @@ export function relocateLogicalTabs({ runtime, windowRuntime, tabIds, destinatio
     };
   });
   targetLayout.tree.splice(insertionIndex, 0, ...insertedNodes);
+  if (destination.relation === "inside") {
+    // Tabs nested into a collapsed parent would vanish from view.
+    const parentNode = targetLayout.tree.find((node) => node.tabId === destination.anchorTabId);
+    if (parentNode) {
+      parentNode.collapsed = false;
+    }
+  }
   targetLayout.splitViews.push(
     ...movingSplitViews.map((splitView) => ({
       ...splitView,

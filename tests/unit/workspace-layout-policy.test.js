@@ -17,6 +17,7 @@ import {
   relocateLogicalSelection,
   relocateLogicalTabs,
   removeTabFromLayouts,
+  repairWorkspaceTree,
   setLogicalGroupTitle,
   setLogicalTreeParent
 } from "../../src/core/workspace-layout-policy.js";
@@ -634,7 +635,8 @@ test("mixed native selection preserves pins and complete groups while splitting 
       { tabId: "tab-full-a", parentTabId: null, collapsed: true },
       { tabId: "tab-full-b", parentTabId: "tab-full-a", collapsed: false },
       { tabId: "tab-part-a", parentTabId: null, collapsed: true },
-      { tabId: "tab-loose-b", parentTabId: "tab-loose-a", collapsed: false }
+      // Two groups now separate it from tab-loose-a, so it cannot stay nested.
+      { tabId: "tab-loose-b", parentTabId: null, collapsed: false }
     ],
     splitViews: []
   });
@@ -1182,4 +1184,133 @@ test("group placement refuses anchors that would split a tab tree and accepts br
     place(["[g:g1 g2]", "[h:h1 h2]", "b"], { relation: "after", anchorTabId: "h1" }),
     ["h:h1", "h:h2", "g:g1", "g:g2", "b"]
   );
+});
+
+function rowsLayout(rows, { pinned = [], groups = [] } = {}) {
+  return {
+    workspaceId: WORK_ID,
+    tabIds: rows.map(([tabId]) => tabId),
+    pinnedTabIds: pinned,
+    groups,
+    tree: rows.map(([tabId, parentTabId = null, collapsed = false]) => ({
+      tabId,
+      parentTabId,
+      collapsed
+    })),
+    splitViews: []
+  };
+}
+
+function parents(layout) {
+  return Object.fromEntries(layout.tree.map(({ tabId, parentTabId }) => [tabId, parentTabId]));
+}
+
+test("tree repair fits a tab that lands inside a branch into that branch", () => {
+  const between = rowsLayout([["a"], ["n"], ["b", "a"]]);
+  assert.equal(repairWorkspaceTree(between), true);
+  assert.deepEqual(parents(between), { a: null, n: "a", b: "a" });
+
+  const afterChild = rowsLayout([["a"], ["b", "a"], ["n"], ["c", "a"]]);
+  repairWorkspaceTree(afterChild);
+  assert.deepEqual(parents(afterChild), { a: null, b: "a", n: "a", c: "a" });
+
+  const atEnd = rowsLayout([["a"], ["b", "a"], ["n"]]);
+  assert.equal(repairWorkspaceTree(atEnd), false);
+  assert.deepEqual(parents(atEnd), { a: null, b: "a", n: null });
+});
+
+test("tree repair keeps an opener parent only where the tab landed inside its branch", () => {
+  const adjacent = rowsLayout([["a"], ["n1"], ["n2"], ["z"]]);
+  repairWorkspaceTree(adjacent, { preferredParents: new Map([["n1", "a"], ["n2", "a"]]) });
+  assert.deepEqual(parents(adjacent), { a: null, n1: "a", n2: "a", z: null });
+
+  const far = rowsLayout([["a"], ["b", "a"], ["z"], ["n"]]);
+  repairWorkspaceTree(far, { preferredParents: new Map([["n", "a"]]) });
+  assert.deepEqual(parents(far), { a: null, b: "a", z: null, n: null });
+
+  const farInsideAnother = rowsLayout([["a"], ["z"], ["n"], ["z1", "z"]]);
+  repairWorkspaceTree(farInsideAnother, { preferredParents: new Map([["n", "a"]]) });
+  assert.deepEqual(parents(farInsideAnother), { a: null, z: null, n: "z", z1: "z" });
+});
+
+test("tree repair leaves contiguous trees unchanged and resolves split branches consistently", () => {
+  const valid = rowsLayout([["a"], ["b", "a"], ["c", "b"], ["d", "a"], ["e"]]);
+  const before = structuredClone(valid.tree);
+  assert.equal(repairWorkspaceTree(valid), false);
+  assert.deepEqual(valid.tree, before);
+
+  // An intruding branch keeps its own children; the stranded child becomes a root.
+  const intruder = rowsLayout([["a"], ["n"], ["n1", "n"], ["b", "a"]]);
+  repairWorkspaceTree(intruder);
+  assert.deepEqual(parents(intruder), { a: null, n: null, n1: "n", b: null });
+
+  const grouped = rowsLayout([["a"], ["g1"], ["g2"], ["b", "a"]], {
+    groups: [{ id: "g", title: "", color: "blue", collapsed: false, tabIds: ["g1", "g2"] }]
+  });
+  repairWorkspaceTree(grouped);
+  assert.deepEqual(parents(grouped), { a: null, g1: null, g2: null, b: null });
+});
+
+function relocateRuntime(layout) {
+  return {
+    tabs: layout.tabIds.map((id) => ({ id, workspaceId: WORK_ID })),
+    windows: [{ workspaceLayouts: [layout] }]
+  };
+}
+
+function moveTabs(layout, tabIds, destination) {
+  const runtime = relocateRuntime(layout);
+  return relocateLogicalTabs({
+    runtime,
+    windowRuntime: runtime.windows[0],
+    tabIds,
+    destination: {
+      workspaceId: WORK_ID,
+      zone: "ungrouped",
+      groupId: null,
+      parentTabId: null,
+      ...destination
+    }
+  });
+}
+
+test("dropping after a parent lands after its whole branch, collapsed or not", () => {
+  for (const collapsed of [true, false]) {
+    const layout = rowsLayout([["x"], ["p", null, collapsed], ["c1", "p"], ["c2", "c1"], ["y"]]);
+    assert.ok(moveTabs(layout, ["x"], { relation: "after", anchorTabId: "p" }));
+    assert.deepEqual(layout.tabIds, ["p", "c1", "c2", "x", "y"]);
+    assert.deepEqual(parents(layout), { p: null, c1: "p", c2: "c1", x: null, y: null });
+  }
+});
+
+test("a drop below a branch may pick any level the surrounding rows allow", () => {
+  const nested = rowsLayout([["p"], ["c", "p"], ["y"], ["x"]]);
+  assert.ok(moveTabs(nested, ["x"], { relation: "after", anchorTabId: "c", parentTabId: "p" }));
+  assert.deepEqual(parents(nested), { p: null, c: "p", x: "p", y: null });
+
+  const outer = rowsLayout([["p"], ["c", "p"], ["y"], ["x"]]);
+  assert.ok(moveTabs(outer, ["x"], { relation: "after", anchorTabId: "c", parentTabId: null }));
+  assert.deepEqual(outer.tabIds, ["p", "c", "x", "y"]);
+  assert.deepEqual(parents(outer), { p: null, c: "p", x: null, y: null });
+});
+
+test("a destination that would split a branch is refused without changing the layout", () => {
+  const layout = rowsLayout([["x"], ["p"], ["c1", "p"], ["c2", "p"]]);
+  const before = structuredClone(layout);
+  assert.equal(
+    moveTabs(layout, ["x"], { relation: "before", anchorTabId: "c2", parentTabId: null }),
+    null
+  );
+  assert.deepEqual(layout, before);
+  assert.ok(moveTabs(layout, ["x"], { relation: "before", anchorTabId: "c1", parentTabId: "p" }));
+  assert.deepEqual(layout.tabIds, ["p", "x", "c1", "c2"]);
+  assert.deepEqual(parents(layout), { p: null, x: "p", c1: "p", c2: "p" });
+});
+
+test("nesting into a collapsed parent expands it so the moved tabs stay visible", () => {
+  const layout = rowsLayout([["x"], ["x1", "x"], ["p", null, true], ["c", "p"], ["y"]]);
+  assert.ok(moveTabs(layout, ["x", "x1"], { relation: "inside", anchorTabId: "p", parentTabId: "p" }));
+  assert.deepEqual(layout.tabIds, ["p", "c", "x", "x1", "y"]);
+  assert.deepEqual(parents(layout), { p: null, c: "p", x: "p", x1: "x", y: null });
+  assert.equal(layout.tree.find(({ tabId }) => tabId === "p").collapsed, false);
 });

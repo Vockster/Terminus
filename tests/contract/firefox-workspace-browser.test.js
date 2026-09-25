@@ -171,6 +171,9 @@ test("Firefox copy creates a fresh adjacent loose tab and cleans up mismatches",
     cookieStoreId: "firefox-container-2"
   }]);
 
+  await adapter.copyTab(11, { cookieStoreId: "firefox-container-2", index: 6 });
+  assert.equal(calls.at(-1)[1].index, 6);
+
   returnedCookieStoreId = "firefox-container-wrong";
   await assert.rejects(
     adapter.copyTab(11, { cookieStoreId: "firefox-container-2" }),

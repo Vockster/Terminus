@@ -18,7 +18,6 @@ import {
   preserveRelocatedWholeSplitViews,
   repairWorkspaceTree,
   removeTabFromLayouts,
-  setLogicalTreeParent,
   setLogicalGroupPartition
 } from "./workspace-layout-policy.js";
 import {
@@ -941,7 +940,11 @@ export class WorkspaceReconciler {
         assignmentByTabId
       }) || changed;
 
-    for (const [tabId, parentTabId] of inheritedParentByTabId) {
+    // An opener only becomes the parent where the tab's placement allows it.
+    // The repair after Firefox-order capture applies the same preferred
+    // parents again, so a captured layout ends up judged by Firefox's order.
+    const inheritedLayouts = new Set();
+    for (const tabId of inheritedParentByTabId.keys()) {
       const ownerId = liveOwnerByTabId.get(tabId);
       const context = [...contexts.values()].find(
         ({ windowRuntime }) => windowRuntime.id === ownerId
@@ -949,9 +952,12 @@ export class WorkspaceReconciler {
       const layout = context?.windowRuntime.workspaceLayouts.find(
         ({ workspaceId }) => workspaceId === assignmentByTabId.get(tabId)
       );
-      if (layout && setLogicalTreeParent(layout, tabId, parentTabId)) {
-        changed = true;
+      if (layout) {
+        inheritedLayouts.add(layout);
       }
+    }
+    for (const layout of inheritedLayouts) {
+      changed = repairWorkspaceTree(layout, { preferredParents: inheritedParentByTabId }) || changed;
     }
 
     const rememberedTabIds = new Set();
@@ -1059,7 +1065,9 @@ export class WorkspaceReconciler {
             reservedSplitViewIds: splitViewIdsOutsideLayout(runtime, layout)
           });
           changed = result.changed || changed;
-          changed = repairWorkspaceTree(result.layout) || changed;
+          changed = repairWorkspaceTree(result.layout, {
+            preferredParents: inheritedParentByTabId
+          }) || changed;
           for (const tab of context.tabs.filter(
             (entry) => assignmentByTabId.get(entry.logicalId) === workspaceId
           )) {

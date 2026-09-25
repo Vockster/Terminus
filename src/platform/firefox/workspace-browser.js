@@ -688,13 +688,13 @@ export function createFirefoxWorkspaceBrowser(
       return created;
     },
 
-    async copyTab(tabId, { cookieStoreId = null } = {}) {
+    async copyTab(tabId, { cookieStoreId = null, index = null } = {}) {
       const source = windowScopeRegistry
         ? await requireTabScope(tabId)
         : await browserApi.tabs.get(tabId);
       const created = await browserApi.tabs.create({
         windowId: source.windowId,
-        index: source.index + 1,
+        index: Number.isInteger(index) ? index : source.index + 1,
         active: true,
         url: supportedCopyUrl(source.url),
         ...(cookieStoreId === null ? {} : { cookieStoreId })

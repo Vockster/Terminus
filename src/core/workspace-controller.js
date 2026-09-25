@@ -43,6 +43,7 @@ import {
   placeTabInLayout,
   removeTabFromLayouts,
   relocateLogicalGroup,
+  repairWorkspaceTree,
   relocateLogicalSelection,
   relocateLogicalTabs,
   setLogicalGroupCollapsed,
@@ -798,9 +799,18 @@ function buildWorkspaceSearchIndex(context, containerService = null, tabLocation
   );
 }
 
-function buildMoveOutcome(kind, requestedCount, finalContext) {
-  const appliedCount = requestedCount;
-  const pending = finalContext.windowRuntime.pendingOperation !== null;
+// A moved tab counts as applied once it is still live and assigned to the
+// destination; a pending materialization keeps the outcome partial.
+function buildMoveOutcome(kind, movedTabIds, destinationWorkspaceId, finalContext) {
+  const requestedCount = movedTabIds.size;
+  const liveTabIds = new Set(finalContext.tabs.map((tab) => tab.logicalId));
+  const appliedCount = [...movedTabIds].filter(
+    (tabId) =>
+      liveTabIds.has(tabId) &&
+      finalContext.assignmentByTabId?.get(tabId) === destinationWorkspaceId
+  ).length;
+  const pending =
+    finalContext.windowRuntime.pendingOperation !== null || appliedCount < requestedCount;
   const tabs = finalContext.tabs;
   return parseWorkspaceOperationOutcome({
     operation: kind,
@@ -810,7 +820,7 @@ function buildMoveOutcome(kind, requestedCount, finalContext) {
     requestedCount,
     appliedCount,
     skipped: [],
-    failedCount: 0,
+    failedCount: requestedCount - appliedCount,
     observed: {
       tabCount: tabs.length,
       hiddenCount: tabs.filter((tab) => tab.hidden === true).length,
@@ -2405,18 +2415,35 @@ export class WorkspaceController {
     const cookieStoreId = assignment.kind === "none"
       ? null
       : await this.#containerService.resolve(assignment.refId);
-    const created = await this.#browser.copyTab(tabId, { cookieStoreId });
+    // The copy is the source's sibling, so it lands after the source's whole
+    // branch in Firefox and in the layout; next to the source it would split
+    // the branch.
+    const sourceLayout = findWorkspaceLayoutForTab(context.windowRuntime, source.logicalId)?.layout;
+    const branchIds = sourceLayout ? descendantClosure(sourceLayout, [source.logicalId]) : [];
+    const branchSet = new Set(branchIds);
+    const branchNativeEnd = Math.max(
+      source.index,
+      ...context.tabs.filter((tab) => branchSet.has(tab.logicalId)).map((tab) => tab.index)
+    );
+    const created = await this.#browser.copyTab(tabId, {
+      cookieStoreId,
+      index: branchNativeEnd + 1
+    });
     const logicalId = await this.#browser.getOrCreateTabIdentity(created.id);
     inventory.runtime.tabs.push({ id: logicalId, workspaceId });
     const layout = placeTabInLayout(context.windowRuntime, workspaceId, logicalId);
-    const sourceIndex = layout.tabIds.indexOf(source.logicalId);
+    const branchEnd = Math.max(...branchIds.map((id) => layout.tabIds.indexOf(id)));
     const createdIndex = layout.tabIds.indexOf(logicalId);
-    if (sourceIndex >= 0 && createdIndex >= 0 && createdIndex !== sourceIndex + 1) {
+    if (branchEnd >= 0 && createdIndex >= 0) {
+      const sourceParent = layout.tree.find((node) => node.tabId === source.logicalId)
+        ?.parentTabId ?? null;
       layout.tabIds.splice(createdIndex, 1);
-      layout.tabIds.splice(sourceIndex + 1, 0, logicalId);
       const treeIndex = layout.tree.findIndex((node) => node.tabId === logicalId);
       const [node] = layout.tree.splice(treeIndex, 1);
-      layout.tree.splice(sourceIndex + 1, 0, node);
+      const insertAt = createdIndex < branchEnd ? branchEnd : branchEnd + 1;
+      layout.tabIds.splice(insertAt, 0, logicalId);
+      layout.tree.splice(insertAt, 0, { ...node, parentTabId: sourceParent });
+      repairWorkspaceTree(layout);
     }
     await this.#runtimeService.save(
       inventory.runtime,
@@ -3252,7 +3279,8 @@ export class WorkspaceController {
       view: this.#buildWorkspaceView(context),
       outcome: buildMoveOutcome(
         WORKSPACE_PENDING_OPERATION_KINDS.RELOCATE_TABS,
-        movingIds.size,
+        movingIds,
+        destination.workspaceId,
         context
       )
     };
@@ -3813,7 +3841,8 @@ export class WorkspaceController {
       view: this.#buildWorkspaceView(context),
       outcome: buildMoveOutcome(
         WORKSPACE_PENDING_OPERATION_KINDS.RELOCATE_TABS,
-        movingIds.size,
+        movingIds,
+        destinationWorkspaceId,
         context
       )
     };
@@ -4016,7 +4045,8 @@ export class WorkspaceController {
       view: this.#buildWorkspaceView(context),
       outcome: buildMoveOutcome(
         WORKSPACE_PENDING_OPERATION_KINDS.MOVE_GROUP,
-        source.tabIds.length,
+        new Set(source.tabIds),
+        destination.workspaceId,
         context
       )
     };
@@ -4238,7 +4268,8 @@ export class WorkspaceController {
       view: this.#buildWorkspaceView(finalContext),
       outcome: buildMoveOutcome(
         WORKSPACE_PENDING_OPERATION_KINDS.MOVE_TAB,
-        movingIds.size,
+        movingIds,
+        destinationWorkspaceId,
         finalContext
       )
     };
@@ -4325,7 +4356,8 @@ export class WorkspaceController {
       view: this.#buildWorkspaceView(finalContext),
       outcome: buildMoveOutcome(
         WORKSPACE_PENDING_OPERATION_KINDS.MOVE_GROUP,
-        memberIds.size,
+        memberIds,
+        destinationWorkspaceId,
         finalContext
       )
     };
