@@ -1480,7 +1480,12 @@ test("sidebar owns detailed tabs, internal drag markers, and explicit compact de
   assert.match(pane, /label: "Delete group"[\s\S]*?variant: "danger"/);
   assert.match(pane, /label: `Close group \(\$\{group\.tabIds\.length\} tabs\)`[\s\S]*?variant: "danger"/);
   assert.doesNotMatch(pane, /Pin group/);
-  assert.match(pane, /destinationForZone\(currentView\.activeWorkspaceId, "group", group\.id\)/);
+  const dropResolver = await readFile(
+    new URL("../../src/sidebar/tab-drop-resolver.js", import.meta.url),
+    "utf8"
+  );
+  assert.match(dropResolver, /destinationForZone\(context\.workspaceId, "group", entry\.group\.id\)/);
+  assert.match(pane, /bindListDrop\(scrollRoot\)/);
   assert.match(pane, /header\.draggable = !splitLocked/);
   assert.match(nativeDrop, /text\/x-moz-text-internal/);
   assert.match(nativeDrop, /highlighted: true/);
@@ -1654,7 +1659,15 @@ test("sidebar draws tree guides, collapsed counts, and the rail + in both conten
     css,
     /\.tree-branch-cell\[data-shape="tee"\]::after,\s*\.tree-branch-cell\[data-shape="elbow"\]::after \{[\s\S]*?inset-block-start: 50%;[\s\S]*?inline-size: 100%;[\s\S]*?block-size: 1px;/
   );
-  assert.match(css, /\[data-content-mode="icons"\] \.tree-branch \{\s*display: none;/);
+  // Icons Only draws nesting as up to four grey edge lines inside the tile,
+  // opposite the group line, without changing the column width.
+  assert.match(css, /\[data-content-mode="icons"\] \.tree-branch \{\s*inset-block: 9px;\s*inset-inline: auto 1px;/);
+  assert.match(css, /\[data-content-mode="icons"\] \.tree-branch-cell \{\s*inline-size: 2px;/);
+  assert.match(css, /\[data-content-mode="icons"\] \.tree-branch-cell:nth-child\(n \+ 5\) \{\s*display: none;/);
+  assert.match(
+    css,
+    /\[data-content-mode="icons"\] \.tree-branch-cell::before,\s*\[data-content-mode="icons"\] \.tree-branch-cell::after \{\s*content: none;/
+  );
   assert.match(css, /forced-colors[\s\S]*?--tree-guide-color: GrayText;/);
   assert.match(pane, /const branch = tab\.pinned \? null : branchShape;/);
   assert.match(pane, /row\.dataset\.nested = "true";\s*row\.append\(treeBranch\(branch\)\);/);
@@ -2060,4 +2073,23 @@ test("overlapping UI reads are guarded so only the newest response can render", 
   assert.match(sidebar, /const sequence = \+\+containerRequestSequence;[\s\S]*?sequence !== containerRequestSequence/);
   assert.match(sidebar, /const sequence = \+\+customIconRequestSequence;[\s\S]*?sequence !== customIconRequestSequence/);
   assert.match(sidebar, /const sequence = \+\+undoRequestSequence;[\s\S]*?sequence !== undoRequestSequence/);
+});
+
+test("Icons Only search, disclosure target, and queued drops keep their contracts", async () => {
+  const css = await readFile(new URL("../../src/sidebar/styles.css", import.meta.url), "utf8");
+  const sidebarMain = await readFile(new URL("../../src/sidebar/main.js", import.meta.url), "utf8");
+  // An open search hides the tab list and footer only while results show.
+  assert.match(
+    css,
+    /\[data-content-mode="icons"\] \.tab-pane\[data-tab-search-results="true"\] \.tab-list,\s*\[data-content-mode="icons"\] \.tab-pane\[data-tab-search-results="true"\] \.tab-footer \{\s*display: none;/
+  );
+  assert.doesNotMatch(css, /\[data-tab-search-open="true"\] \.tab-list/);
+  assert.match(
+    css,
+    /\[data-content-mode="icons"\] \.tab-disclosure:not\(:disabled\)::before \{[\s\S]*?inline-size: 18px;\s*block-size: 18px;/
+  );
+  assert.match(css, /\[data-content-mode="icons"\] \.tab-disclosure:disabled \{\s*pointer-events: none;/);
+  assert.match(css, /\.drop-before::before,\s*\.drop-after::after \{[\s\S]*?inset-inline: var\(--drop-indent, 2px\) 2px;/);
+  assert.match(sidebarMain, /onDropTabs: \(sources, destination\) => enqueueDrop\(/);
+  assert.match(sidebarMain, /onDropGroup: \(source, destination\) => enqueueDrop\(/);
 });

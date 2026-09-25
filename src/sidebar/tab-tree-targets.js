@@ -65,7 +65,7 @@ function splitEdge(activeTabs, tab, relation) {
 
 // Mirrors the controller's rule that no placement may separate a Split View
 // pair, so a menu never offers a move that would be refused.
-function destinationSplitsPair(tabById, destination) {
+export function destinationSplitsPair(tabById, destination) {
   const anchor = tabById.get(destination.anchorTabId);
   const parent = tabById.get(destination.parentTabId);
   if ((anchor?.splitViewId ?? null) === null && (parent?.splitViewId ?? null) === null) {

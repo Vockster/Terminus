@@ -554,3 +554,44 @@ test("bottom placement, disabled search, and uppercase stored colors", async () 
   toggle.click();
   assert.equal(harness.controller.isOpen(), false);
 });
+
+test("the pane marks results only while a query shows them, so an empty query keeps the list", async () => {
+  const harness = createSearchHarness({ contentMode: "icons" });
+  const { pane } = harness.elements;
+  await openWithIndex(harness);
+  assert.equal(pane.dataset.tabSearchOpen, "true");
+  assert.equal(pane.dataset.tabSearchResults, "false");
+
+  harness.type("report");
+  assert.equal(pane.dataset.tabSearchResults, "true");
+
+  harness.type("");
+  assert.equal(pane.dataset.tabSearchResults, "false");
+
+  harness.type("report");
+  harness.elements.toggle.click();
+  assert.equal(pane.dataset.tabSearchOpen, "false");
+  assert.equal(pane.dataset.tabSearchResults, "false");
+});
+
+test("Escape closes search from the tab list or the page body, but not from a menu", async () => {
+  const harness = createSearchHarness({ contentMode: "icons" });
+  const { pane, treeRow } = harness.elements;
+  await openWithIndex(harness);
+
+  const menu = element(harness.document, "div", { className: "command-menu" });
+  const menuItem = element(harness.document, "button", { className: "command-menu-item" });
+  menu.append(menuItem);
+  harness.document.body.append(menu);
+  harness.key(menuItem, "Escape");
+  assert.equal(pane.dataset.tabSearchOpen, "true");
+
+  const fromRow = harness.key(treeRow, "Escape");
+  assert.equal(pane.dataset.tabSearchOpen, "false");
+  assert.equal(fromRow.defaultPrevented, true);
+
+  harness.elements.toggle.click();
+  assert.equal(pane.dataset.tabSearchOpen, "true");
+  harness.key(harness.document.body, "Escape");
+  assert.equal(pane.dataset.tabSearchOpen, "false");
+});

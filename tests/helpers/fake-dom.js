@@ -147,8 +147,16 @@ export function createFakeDocument() {
 
     dispatchEvent(event) {
       event.target ??= this;
+      let top = this;
       for (let node = this; node && !event.propagationStopped; node = node.parentNode) {
         for (const listener of node.listeners?.get(event.type) ?? []) {
+          listener(event);
+        }
+        top = node;
+      }
+      // Attached elements bubble on to the document, as in a browser.
+      if (top === document.body && !event.propagationStopped) {
+        for (const listener of documentListeners.get(event.type) ?? []) {
           listener(event);
         }
       }
@@ -172,8 +180,13 @@ export function createFakeDocument() {
     return true;
   }
 
+  const documentListeners = new Map();
   const document = {
     body: null,
+    addEventListener(type, listener) {
+      if (!documentListeners.has(type)) documentListeners.set(type, []);
+      documentListeners.get(type).push(listener);
+    },
     createElement: (tagName) => new FakeElement(tagName),
     createDocumentFragment() {
       const fragment = new FakeElement("#fragment");

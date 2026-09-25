@@ -42,7 +42,7 @@ function view(activeTabs) {
   };
 }
 
-function createPane() {
+function createPane(options = {}) {
   const root = element(document, "div");
   document.body.append(root);
   const noop = async () => undefined;
@@ -62,7 +62,8 @@ function createPane() {
     onRelocateNativeSelection: () => false,
     onCancelNativeDrop: () => undefined,
     onSetTreeCollapsed: noop,
-    onSetGroupCollapsed: noop
+    onSetGroupCollapsed: noop,
+    ...options
   });
   const rows = () => root.querySelectorAll(".tab-row");
   return { pane, rows };
@@ -320,4 +321,15 @@ test("a background render keeps an open tab menu while its structure is unchange
   assert.equal(commandMenu.hidden, false);
   pane.render(view([row(2), row(1, { title: "Renamed" })]));
   assert.equal(commandMenu.hidden, true, "a removed target closes its menu");
+});
+
+test("Icons Only tiles name their tab on hover and follow a content-mode change", () => {
+  let iconsOnly = true;
+  const { pane, rows } = createPane({ isIconsOnly: () => iconsOnly });
+  pane.render(view([row(1), row(2, { title: "Quarterly report" })]));
+  assert.deepEqual(rows().map(({ title }) => title), ["Tab 1", "Quarterly report"]);
+
+  iconsOnly = false;
+  pane.render(view([row(1), row(2, { title: "Quarterly report" })]));
+  assert.deepEqual(rows().map(({ title }) => title ?? ""), ["", ""]);
 });

@@ -1,6 +1,5 @@
 import {
   createTabSelection,
-  destinationForTabRow,
   destinationForWorkspace,
   destinationForZone,
   getViewportMenuPosition,
@@ -11,9 +10,9 @@ import {
   shouldToggleTreeFromFavicon,
   tabSourceDescriptor
 } from "./sidebar-interactions.js";
+import { resolveTabDrop } from "./tab-drop-resolver.js";
 import {
   groupMoveDestination,
-  snapGroupDropToBranch,
   tabMoveDestination,
   treeBranchShape,
   treeDescendantSummary,
@@ -30,6 +29,11 @@ const GROUP_LOAD_STATE_LABELS = Object.freeze({
 });
 
 const PRIVATE_DRAG_TYPE = "application/x-sidebars-drag-session";
+// Auto-scroll starts only after the pointer rests this long in the edge band,
+// so aiming at the first or last visible row does not scroll it away.
+const AUTO_SCROLL_BAND = 16;
+const AUTO_SCROLL_DWELL_MS = 200;
+const AUTO_SCROLL_MAX_STEP = 12;
 const INTERNAL_PAGE_ICONS = Object.freeze({
   settings: "../assets/icons/app.svg"
 });
@@ -107,6 +111,8 @@ export function createTabPane({
   onActivate,
   onRelocateTabs,
   onRelocateGroup,
+  onDropTabs = onRelocateTabs,
+  onDropGroup = onRelocateGroup,
   onRenameGroup,
   onDeleteGroup,
   onCreateGroup,
@@ -126,6 +132,11 @@ export function createTabPane({
   const selection = createTabSelection();
   let currentView = null;
   let dragSession = null;
+  // A render during a drag would rebuild the source row and clear the drop
+  // line, so the newest view waits until the drag ends.
+  let deferredView = null;
+  let dropGeometry = null;
+  let lastDrop = null;
   let pendingFocusId = null;
   // Rebuilding every row for one changed tab dominated large sessions and
   // detached every favicon image. A row is reused only when every input it
@@ -338,12 +349,17 @@ export function createTabPane({
     }
   }
 
-  async function relocateRows(rows, destination, focusId = rows[0]?.logicalId) {
+  async function relocateRows(
+    rows,
+    destination,
+    focusId = rows[0]?.logicalId,
+    relocate = onRelocateTabs
+  ) {
     if (!destination || rows.length === 0) {
       return;
     }
     pendingFocusId = focusId;
-    await onRelocateTabs(rows.map(tabSourceDescriptor), destination);
+    await relocate(rows.map(tabSourceDescriptor), destination);
   }
 
   function tabIdentity(tab) {
@@ -490,33 +506,83 @@ export function createTabPane({
     ];
   }
 
-  function markDrop(target, className) {
+  function markDrop(target, className, indent = null) {
     target.classList.add(className);
+    if (indent === null) {
+      target.style.removeProperty("--drop-indent");
+    } else {
+      target.style.setProperty("--drop-indent", `${indent}px`);
+    }
     dropMarkedElements.add(target);
   }
 
   function clearDropMarkers() {
     for (const target of dropMarkedElements) {
       target.classList.remove("drop-before", "drop-after", "drop-inside", "drop-workspace");
+      target.style.removeProperty("--drop-indent");
     }
     dropMarkedElements.clear();
   }
 
-  // The scroll container's viewport bounds are stable for the duration of one
-  // drag, so they are read once per drag session instead of per pointer event.
-  let autoScrollBoundsSession = null;
-  let autoScrollBounds = null;
+  // Auto-scroll runs on its own frame loop from the last known pointer
+  // position, because Firefox repeats dragover only sparsely while the pointer
+  // rests at an edge.
+  let autoScrollPointerY = null;
+  let autoScrollBandSince = null;
+  let autoScrollFrame = null;
 
-  function autoScroll(event) {
-    if (autoScrollBoundsSession !== dragSession || autoScrollBounds === null) {
-      autoScrollBounds = scrollRoot.getBoundingClientRect();
-      autoScrollBoundsSession = dragSession;
+  function autoScrollStep(now) {
+    autoScrollFrame = null;
+    if (!dragSession) return;
+    const bounds = scrollRoot.getBoundingClientRect();
+    const y = autoScrollPointerY;
+    const depth = y === null
+      ? 0
+      : y < bounds.top + AUTO_SCROLL_BAND
+        ? -(bounds.top + AUTO_SCROLL_BAND - y)
+        : y > bounds.bottom - AUTO_SCROLL_BAND
+          ? y - (bounds.bottom - AUTO_SCROLL_BAND)
+          : 0;
+    if (depth === 0) {
+      autoScrollBandSince = null;
+    } else {
+      autoScrollBandSince ??= now;
+      if (now - autoScrollBandSince >= AUTO_SCROLL_DWELL_MS) {
+        const ratio = Math.min(1, Math.abs(depth) / AUTO_SCROLL_BAND);
+        scrollRoot.scrollBy({
+          top: Math.sign(depth) * Math.max(1, Math.round(ratio * AUTO_SCROLL_MAX_STEP)),
+          behavior: "auto"
+        });
+      }
     }
-    const bounds = autoScrollBounds;
-    if (event.clientY < bounds.top + 28) {
-      scrollRoot.scrollBy({ top: -20, behavior: "auto" });
-    } else if (event.clientY > bounds.bottom - 28) {
-      scrollRoot.scrollBy({ top: 20, behavior: "auto" });
+    autoScrollFrame = requestAnimationFrame(autoScrollStep);
+  }
+
+  function beginDrag(session) {
+    dragSession = session;
+    dropGeometry = null;
+    lastDrop = null;
+    autoScrollPointerY = null;
+    autoScrollBandSince = null;
+    if (autoScrollFrame === null) {
+      autoScrollFrame = requestAnimationFrame(autoScrollStep);
+    }
+  }
+
+  function endDrag() {
+    dragSession = null;
+    dropGeometry = null;
+    lastDrop = null;
+    autoScrollPointerY = null;
+    if (autoScrollFrame !== null) {
+      cancelAnimationFrame(autoScrollFrame);
+      autoScrollFrame = null;
+    }
+    clearDropMarkers();
+    if (deferredView !== null) {
+      const view = deferredView;
+      deferredView = null;
+      render(view);
     }
   }
 
@@ -530,72 +596,117 @@ export function createTabPane({
       dragSession = null;
       return;
     }
-    dragSession = {
+    beginDrag({
       kind: "tabs",
       sources: rows.map(tabSourceDescriptor),
       rows,
       selected,
       tabIds: new Set(rows.map(({ logicalId }) => logicalId))
-    };
+    });
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.setData(PRIVATE_DRAG_TYPE, crypto.randomUUID());
   }
 
-  function dropTabs(destination) {
-    const session = dragSession;
-    return relocateRows(
-      destination?.zone === "pinned" ? session.selected : session.rows,
-      destination
-    );
+  function dropTabs(destination, relocate = onDropTabs) {
+    const rows = destination?.zone === "pinned" ? dragSession.selected : dragSession.rows;
+    return relocateRows(rows, destination, rows[0]?.logicalId, relocate);
   }
 
   function startGroupDrag(event, group) {
-    dragSession = {
+    beginDrag({
       kind: "group",
       source: groupSourceDescriptor(group, currentView.activeWorkspaceId)
-    };
+    });
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.setData(PRIVATE_DRAG_TYPE, crypto.randomUUID());
   }
 
-  function bindRowDrop(row, tab) {
-    row.addEventListener("dragover", (event) => {
-      if (!dragSession) return;
-      if (dragSession.kind === "group" && tab.pinned) return;
-      if (dragSession.kind === "tabs" && dragSession.tabIds.has(tab.logicalId)) return;
-      event.preventDefault();
-      autoScroll(event);
-      clearDropMarkers();
-      const rowBounds = row.getBoundingClientRect();
-      const ratio = (event.clientY - rowBounds.top) / rowBounds.height;
-      let relation = dragSession.kind === "group"
-        ? ratio < 0.5 ? "before" : "after"
-        : ratio < 0.28 ? "before" : ratio > 0.72 ? "after" : "inside";
-      if (tab.splitViewId !== null) {
-        relation = tab.splitPosition === "start" ? "before" : "after";
-      }
-      if (relation === "inside" && tab.pinned) {
-        markDrop(row, ratio < 0.5 ? "drop-before" : "drop-after");
-      } else {
-        markDrop(row, `drop-${relation}`);
-      }
-      row.dataset.dropRelation = relation === "inside" && tab.pinned
-        ? ratio < 0.5 ? "before" : "after"
-        : relation;
+  // Row positions relative to the tab list, measured once per drag: they only
+  // change with a render, which waits until the drag ends.
+  function measureDropGeometry() {
+    const origin = root.getBoundingClientRect();
+    const tabById = new Map(currentView.activeTabs.map((tab) => [tab.logicalId, tab]));
+    const groupById = new Map(currentView.activeGroups.map((group) => [group.id, group]));
+    const entries = [];
+    for (const node of root.querySelectorAll(".tab-row, .tab-group-header")) {
+      const isRow = node.classList.contains("tab-row");
+      const item = isRow ? tabById.get(node.dataset.tabId) : groupById.get(node.dataset.groupId);
+      if (!item) continue;
+      const bounds = node.getBoundingClientRect();
+      const paddingStart = Number.parseFloat(getComputedStyle(node).paddingInlineStart) || 0;
+      entries.push({
+        kind: isRow ? "tab" : "group",
+        ...(isRow ? { tab: item } : { group: item }),
+        node,
+        top: bounds.top - origin.top,
+        bottom: bounds.bottom - origin.top,
+        left: bounds.left - origin.left,
+        contentStart: bounds.left - origin.left + paddingStart
+      });
+    }
+    const branchCell = root.querySelector(".tree-branch-cell");
+    return {
+      entries,
+      indentStep: branchCell?.getBoundingClientRect().width || 16
+    };
+  }
+
+  function resolveDragPosition(event) {
+    dropGeometry ??= measureDropGeometry();
+    const origin = root.getBoundingClientRect();
+    return resolveTabDrop({
+      entries: dropGeometry.entries,
+      view: currentView,
+      pointer: { x: event.clientX - origin.left, y: event.clientY - origin.top },
+      drag: dragSession.kind === "tabs"
+        ? { kind: "tabs", tabIds: dragSession.tabIds }
+        : { kind: "group", groupId: dragSession.source.groupId },
+      iconsOnly: isIconsOnly(),
+      indentStep: dropGeometry.indentStep
     });
-    row.addEventListener("drop", (event) => {
-      if (!dragSession) return;
-      event.preventDefault();
-      const relation = row.dataset.dropRelation;
-      clearDropMarkers();
-      if (dragSession.kind === "tabs") {
-        if (!dragSession.tabIds.has(tab.logicalId)) {
-          void dropTabs(destinationForTabRow(tab, relation));
-        }
-      } else {
-        void onRelocateGroup(dragSession.source, snapGroupDropToBranch(currentView, tab, relation));
+  }
+
+  function showDropIndicator(resolution) {
+    clearDropMarkers();
+    const indicator = resolution?.indicator;
+    if (!indicator) return;
+    const target = dropGeometry.entries[indicator.entryIndex]?.node;
+    if (target) {
+      markDrop(target, `drop-${indicator.edge}`, indicator.indent);
+    }
+  }
+
+  function bindListDrop(target) {
+    target.addEventListener("dragover", (event) => {
+      if (!dragSession || !currentView) return;
+      autoScrollPointerY = event.clientY;
+      lastDrop = resolveDragPosition(event);
+      showDropIndicator(lastDrop);
+      if (lastDrop) {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
       }
-      dragSession = null;
+    });
+    target.addEventListener("dragleave", (event) => {
+      if (!dragSession || (event.relatedTarget && target.contains(event.relatedTarget))) return;
+      autoScrollPointerY = null;
+      lastDrop = null;
+      clearDropMarkers();
+    });
+    target.addEventListener("drop", (event) => {
+      if (!dragSession) return;
+      const resolution = lastDrop ?? resolveDragPosition(event);
+      if (!resolution) {
+        endDrag();
+        return;
+      }
+      event.preventDefault();
+      if (dragSession.kind === "tabs") {
+        void dropTabs(resolution.destination);
+      } else {
+        void onDropGroup(dragSession.source, resolution.destination);
+      }
+      endDrag();
     });
   }
 
@@ -605,7 +716,8 @@ export function createTabPane({
       childCount,
       descendants ?? null,
       branchShape ?? null,
-      currentWorkspaceColor
+      currentWorkspaceColor,
+      isIconsOnly()
     ]);
   }
 
@@ -646,6 +758,10 @@ export function createTabPane({
         .filter(Boolean)
         .join(", ")
     );
+    // Icons Only hides the title, so hovering the tile names the tab.
+    if (isIconsOnly()) {
+      row.title = tab.title;
+    }
     const branch = tab.pinned ? null : branchShape;
     // The drawn branch owns the indent, so depth follows its column count
     // rather than the semantic level, which aria-level still carries.
@@ -805,11 +921,7 @@ export function createTabPane({
     if (tab.splitViewId === null) {
       row.addEventListener("dragstart", (event) => startTabDrag(event, tab));
     }
-    row.addEventListener("dragend", () => {
-      dragSession = null;
-      clearDropMarkers();
-    });
-    bindRowDrop(row, tab);
+    row.addEventListener("dragend", endDrag);
     nextRowsByTabId.set(tab.logicalId, { key: rowKey, row });
     return row;
   }
@@ -838,6 +950,7 @@ export function createTabPane({
       group,
       splitLocked,
       loadState,
+      isIconsOnly(),
       memberInputs.map(([tab, childCount, descendants, branchShape]) =>
         rowKeyFor(tab, childCount, descendants, branchShape))
     ]);
@@ -871,6 +984,9 @@ export function createTabPane({
       "aria-label",
       `${group.title || "Unnamed group"}, ${group.tabIds.length} tabs, ${GROUP_LOAD_STATE_LABELS[loadState]}`
     );
+    if (isIconsOnly()) {
+      header.title = group.title || "Unnamed group";
+    }
     const disclosure = element("span", "group-disclosure");
     disclosure.setAttribute("aria-hidden", "true");
     disclosure.textContent = group.collapsed ? "▸" : "▾";
@@ -922,30 +1038,7 @@ export function createTabPane({
     if (!splitLocked) {
       header.addEventListener("dragstart", (event) => startGroupDrag(event, group));
     }
-    header.addEventListener("dragover", (event) => {
-      if (dragSession?.kind !== "tabs") {
-        return;
-      }
-      event.preventDefault();
-      event.stopPropagation();
-      autoScroll(event);
-      clearDropMarkers();
-      markDrop(header, "drop-inside");
-    });
-    header.addEventListener("drop", (event) => {
-      if (dragSession?.kind !== "tabs") {
-        return;
-      }
-      event.preventDefault();
-      event.stopPropagation();
-      void dropTabs(destinationForZone(currentView.activeWorkspaceId, "group", group.id));
-      dragSession = null;
-      clearDropMarkers();
-    });
-    header.addEventListener("dragend", () => {
-      dragSession = null;
-      clearDropMarkers();
-    });
+    header.addEventListener("dragend", endDrag);
     section.append(header);
     const memberRows = [];
     for (const [tab, childCount, descendants, branchShape] of memberInputs) {
@@ -959,22 +1052,6 @@ export function createTabPane({
     return section;
   }
 
-  function bindZoneDrop(zone, zoneName, groupId = null) {
-    zone.addEventListener("dragover", (event) => {
-      if (dragSession?.kind !== "tabs" || event.target !== zone) return;
-      event.preventDefault();
-      clearDropMarkers();
-      markDrop(zone, "drop-inside");
-    });
-    zone.addEventListener("drop", (event) => {
-      if (dragSession?.kind !== "tabs" || event.target !== zone) return;
-      event.preventDefault();
-      void dropTabs(destinationForZone(currentView.activeWorkspaceId, zoneName, groupId));
-      dragSession = null;
-      clearDropMarkers();
-    });
-  }
-
   function ensureZones() {
     if (pinnedZone !== null) {
       return;
@@ -984,10 +1061,8 @@ export function createTabPane({
     const pinnedLabel = element("h2", "tab-zone-title");
     pinnedLabel.textContent = "Pinned tabs";
     pinnedZone.append(pinnedLabel);
-    bindZoneDrop(pinnedZone, "pinned");
     mainZone = element("section", "tab-zone tab-zone--main");
     mainZone.setAttribute("aria-label", "Workspace tabs");
-    bindZoneDrop(mainZone, "ungrouped");
     root.replaceChildren(pinnedZone, mainZone);
   }
 
@@ -1009,6 +1084,10 @@ export function createTabPane({
   }
 
   function render(view) {
+    if (dragSession !== null) {
+      deferredView = view;
+      return;
+    }
     currentView = view;
     currentWorkspaceColor = view.state.workspaces.find(
       ({ id }) => id === view.activeWorkspaceId
@@ -1111,13 +1190,12 @@ export function createTabPane({
       if (dragSession.kind === "tabs") {
         void dropTabs(destinationForWorkspace(workspaceId, dragSession.sources));
       } else {
-        void onRelocateGroup(
+        void onDropGroup(
           dragSession.source,
           groupDestinationForWorkspace(workspaceId)
         );
       }
-      dragSession = null;
-      clearDropMarkers();
+      endDrag();
     });
   }
 
@@ -1148,6 +1226,15 @@ export function createTabPane({
     }
   });
   window.addEventListener("resize", closeMenu);
+  bindListDrop(scrollRoot);
+  // A pointer event with no drag activity for a while means the drag ended
+  // without its dragend reaching us, which would leave the session stuck.
+  let lastDragActivity = 0;
+  document.addEventListener("dragstart", () => { lastDragActivity = performance.now(); }, true);
+  document.addEventListener("dragover", () => { lastDragActivity = performance.now(); }, true);
+  document.addEventListener("pointermove", () => {
+    if (dragSession !== null && performance.now() - lastDragActivity > 1000) endDrag();
+  });
   document.addEventListener("dragend", onCancelNativeDrop);
   document.addEventListener("drop", onCancelNativeDrop);
   document.addEventListener("dragleave", (event) => {

@@ -1428,15 +1428,18 @@ body {
   grid-column: 5;
 }
 
+/* The insertion line starts where the chosen tree level starts, so dragging
+   out of a branch visibly steps the line outward. */
 .drop-before::before,
 .drop-after::after {
   position: absolute;
   z-index: 2;
-  inset-inline: 2px;
+  inset-inline: var(--drop-indent, 2px) 2px;
   block-size: 3px;
   border-radius: 2px;
   background: var(--sidebar-accent);
   content: "";
+  pointer-events: none;
 }
 
 .drop-before::before {
@@ -1447,9 +1450,11 @@ body {
   inset-block-end: -2px;
 }
 
+/* Nesting fills the target instead of drawing a line, so it cannot be
+   mistaken for an insertion between rows. */
 .drop-inside {
-  outline: 2px dashed var(--sidebar-accent);
-  outline-offset: -3px;
+  background: color-mix(in srgb, var(--sidebar-accent) 28%, transparent);
+  box-shadow: inset 0 0 0 2px var(--sidebar-accent);
 }
 
 .command-menu {
@@ -1781,8 +1786,10 @@ body {
   justify-content: stretch;
 }
 
-[data-content-mode="icons"] .tab-pane[data-tab-search-open="true"] .tab-list,
-[data-content-mode="icons"] .tab-pane[data-tab-search-open="true"] .tab-footer {
+/* Results replace the tab list only while a query shows them; an empty query
+   keeps the list and footer usable under the open search row. */
+[data-content-mode="icons"] .tab-pane[data-tab-search-results="true"] .tab-list,
+[data-content-mode="icons"] .tab-pane[data-tab-search-results="true"] .tab-footer {
   display: none;
 }
 
@@ -1876,8 +1883,32 @@ body {
   inset-inline-start: calc(var(--group-line-width) * -1 - 1px);
 }
 
+/* Without an indent, nesting shows as short grey lines on the tile's
+   inline-end edge, opposite the group line: one per level, at most four. */
 [data-content-mode="icons"] .tree-branch {
+  inset-block: 9px;
+  inset-inline: auto 1px;
+  flex-direction: row-reverse;
+  gap: 2px;
+}
+
+[data-content-mode="icons"] [data-has-count="true"] > .tree-branch {
+  inset-block-end: calc(var(--tab-count-line-size) + 9px);
+}
+
+[data-content-mode="icons"] .tree-branch-cell {
+  inline-size: 2px;
+  border-radius: 1px;
+  background: color-mix(in srgb, currentColor 45%, transparent);
+}
+
+[data-content-mode="icons"] .tree-branch-cell:nth-child(n + 5) {
   display: none;
+}
+
+[data-content-mode="icons"] .tree-branch-cell::before,
+[data-content-mode="icons"] .tree-branch-cell::after {
+  content: none;
 }
 
 /* Icons Only gives counted rows a line below the tile,
@@ -1937,6 +1968,21 @@ body {
   block-size: 8px;
   font-size: 9px;
   line-height: 8px;
+}
+
+/* The arrow stays small, but its button answers an 18px corner of the tile.
+   A leaf's disabled arrow takes no clicks, so its tile activates anywhere. */
+[data-content-mode="icons"] .tab-disclosure:not(:disabled)::before {
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: 0;
+  inline-size: 18px;
+  block-size: 18px;
+  content: "";
+}
+
+[data-content-mode="icons"] .tab-disclosure:disabled {
+  pointer-events: none;
 }
 
 [data-content-mode="icons"] .tab-audio-state {

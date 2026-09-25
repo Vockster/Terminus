@@ -281,6 +281,9 @@ export function createTabSearchController({
     const showingResults = enabled && open && query().length > 0;
     tree.hidden = showingResults;
     results.hidden = !showingResults;
+    // Icons Only hides the tab list and footer behind the overlay only while
+    // results replace them.
+    pane.dataset.tabSearchResults = String(showingResults);
     if (!showingResults || !view) {
       renderedTabs = new Map();
       results.setAttribute("aria-busy", "false");
@@ -474,6 +477,18 @@ export function createTabSearchController({
       event.preventDefault();
       focus(searchAtBottom() ? buttons.at(-1) : buttons[0]);
     }
+  });
+
+  // Escape closes search from anywhere in the pane, including after a click on
+  // the pane's empty space left focus on the document body. Menus and dialogs
+  // keep their own Escape.
+  document.addEventListener("keydown", (event) => {
+    if (!open || event.key !== "Escape" || event.defaultPrevented) return;
+    const target = event.target;
+    const onPage = target === document.body || pane.contains(target);
+    if (!onPage || target.closest?.(".command-menu, .workspace-dialog")) return;
+    event.preventDefault();
+    closeSearch();
   });
 
   results.addEventListener("click", (event) => {

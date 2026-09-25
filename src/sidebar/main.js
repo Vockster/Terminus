@@ -146,6 +146,8 @@ const tabPane = createTabPane({
   onActivate: activateTab,
   onRelocateTabs: relocateTabs,
   onRelocateGroup: relocateGroup,
+  onDropTabs: (sources, destination) => enqueueDrop(() => relocateTabs(sources, destination)),
+  onDropGroup: (source, destination) => enqueueDrop(() => relocateGroup(source, destination)),
   onRenameGroup: openGroupRename,
   onDeleteGroup: deleteTabGroup,
   onCreateGroup: createTabGroup,
@@ -1023,8 +1025,32 @@ function showContainerError(code) {
   showStatus(CONTAINER_ERROR_MESSAGES[knownCode], "error");
 }
 
+// runMutation's single-flight guard would silently discard a drop made while
+// an earlier change is still running, so drops wait their turn instead. A drop
+// that became stale meanwhile is refused by the background and reported.
+let dropQueue = Promise.resolve();
+const mutationIdleWaiters = [];
+
+function whenMutationIdle() {
+  return new Promise((resolve) => mutationIdleWaiters.push(resolve));
+}
+
+function enqueueDrop(run) {
+  const next = dropQueue.then(async () => {
+    while (mutationInFlight) {
+      await whenMutationIdle();
+    }
+    return run();
+  });
+  dropQueue = next.catch(() => undefined);
+  return next;
+}
+
 function setMutationBusy(isBusy) {
   mutationInFlight = isBusy;
+  if (!isBusy) {
+    for (const resolve of mutationIdleWaiters.splice(0)) resolve();
+  }
   workspaceList.setAttribute("aria-busy", String(isBusy));
   tabList.setAttribute("aria-busy", String(isBusy));
   // Disabling a focused control blurs it, so tab search stays enabled while
@@ -1418,7 +1444,9 @@ function showPlacementResult(response) {
   const outcome = parseWorkspaceOperationOutcome(response.outcome);
   if (outcome.status !== "applied") {
     showStatus(
-      `${outcome.appliedCount} of ${outcome.requestedCount} tabs reached the requested placement.`,
+      outcome.appliedCount < outcome.requestedCount
+        ? `${outcome.appliedCount} of ${outcome.requestedCount} tabs reached the requested placement.`
+        : "Firefox hasn't finished arranging the moved tabs yet.",
       "warning"
     );
   }
