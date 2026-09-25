@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-09-24
+
+### Changed
+
+- Dragging tabs is easier to aim. Every point over the tab list, including the
+  gaps between rows and the space below the last tab, lands on the nearest
+  slot. The line shows exactly where the tabs will go, and nesting into a tab
+  has its own look.
+- Below the last tab of a tree, drag left to leave the tree, one level per
+  step. In Icons Only, the lower half of that spot leaves it.
+- Tabs can now be dropped just outside a group, first in a group, and at the
+  end of the list.
+- In Icons Only, hovering a tile shows the tab or group name, child tabs show
+  their nesting level with thin lines on the tile's edge, and the
+  expand/collapse arrow is easier to hit.
+
+### Fixed
+
+- A new tab opened inside a tab tree split it, making the tabs below look
+  nested under the new tab. A new tab now joins the tree where Firefox places
+  it, and stays under the tab that opened it only when it lands inside that
+  tab's tree.
+- Copy to container placed the copy between a tab and its nested tabs. It now
+  lands after the whole tree.
+- Dropping tabs just below a parent put them between the parent and its
+  children. They now become its first children, or, below a collapsed parent,
+  go after its hidden tabs.
+- Drops on the gaps between rows sent tabs to the end of the list or pinned
+  them, and some drops did nothing while still showing a drop line.
+- A drop made while an earlier move was finishing was ignored. It now runs
+  next.
+- Dropping into a collapsed tab now expands it so the moved tabs stay visible.
+- In Icons Only, opening tab search blanked the sidebar until something was
+  typed. The tab list and footer now stay visible, and Escape closes search
+  from anywhere in it.
+
 ## [0.1.0] - 2026-09-23
 
 The first release of Terminus.

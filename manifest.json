@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Terminus",
   "short_name": "Terminus",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Organize your tabs into workspaces and switch between them from a compact sidebar rail.",
   "browser_specific_settings": {
     "gecko": {
