@@ -2,3 +2,9 @@
 #sidebar-panel-header {
   display: none !important;
 }
+
+/* No Firefox icon strip beside the sidebar. */
+#sidebar-container,
+#sidebar-launcher-splitter {
+  display: none !important;
+}

@@ -149,15 +149,16 @@ test("copying writes the exact text, and a refused or missing clipboard is repor
   );
 });
 
-test("the packaged sheet hides exactly one interface element and needs no other file", async () => {
+test("the packaged sheet hides only the header and icon strip and needs no other file", async () => {
   const source = await readFile(SHEET_URL, "utf8");
   const rules = source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\s+/g, "");
-  assert.equal(rules, "#sidebar-panel-header{display:none!important;}");
+  assert.equal(rules, "#sidebar-panel-header{display:none!important;}#sidebar-container,#sidebar-launcher-splitter{display:none!important;}");
   // One file is the whole install: no assets, imports or other requirements.
   assert.doesNotMatch(rules, /url\(|@import|@charset|@namespace/);
   // The file is the rule and nothing else; Settings carries the instructions.
   assert.equal(
     source.replace(/\r\n/g, "\n"),
-    "/* No sidebar panel header. */\n#sidebar-panel-header {\n  display: none !important;\n}\n"
+    "/* No sidebar panel header. */\n#sidebar-panel-header {\n  display: none !important;\n}\n\n" +
+      "/* No Firefox icon strip beside the sidebar. */\n#sidebar-container,\n#sidebar-launcher-splitter {\n  display: none !important;\n}\n"
   );
 });

@@ -117,9 +117,9 @@ Terminus is a Firefox Desktop extension that keeps your tabs organized into work
 
 ### Optional Firefox styling
 
-- An optional style sheet hides the header bar Firefox draws across the top of the sidebar. Download it from Optional Firefox Styling in Settings.
+- An optional style sheet hides the header bar Firefox draws across the top of the sidebar and Firefox's icon strip beside it. Download it from Optional Firefox Styling in Settings.
 - Terminus works the same without it, and never installs it or checks for it. Settings walks you through installing it in your Firefox profile, undoing it, and fixing common problems.
-- It hides that header for every sidebar in the profile, not only Terminus, and a Firefox update can stop it working.
+- It hides that header for every sidebar in the profile, not only Terminus. The icon strip holds Firefox's own vertical tabs, so they go with it. A Firefox update can stop it working.
 
 The Overview tab in Terminus Settings gives a short tour of these features and links to their settings.
 

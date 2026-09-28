@@ -1015,9 +1015,9 @@ test("the Optional Firefox Styling tab sits before Overview and stays short", as
   assert.ok(start > 0);
   assert.match(panel, /data-panel-content="firefox-styling"[^>]*hidden>/);
   assert.equal((panel.match(/<h1 /g) ?? []).length, 1);
-  assert.match(panel, /<p class="eyebrow">Terminus<\/p>\s*<h1 id="firefox-styling-heading">Optional Firefox Styling<\/h1>\s*<p>Hide the header bar Firefox draws above the sidebar\. Optional: Terminus works the same without it\.<\/p>/);
+  assert.match(panel, /<p class="eyebrow">Terminus<\/p>\s*<h1 id="firefox-styling-heading">Optional Firefox Styling<\/h1>\s*<p>Hide the header bar and icon strip Firefox draws around the sidebar\. Optional: Terminus works the same without it\.<\/p>/);
   const sections = [...panel.matchAll(/<h2 id="[^"]+">(?:<span[^>]*><\/span>)?([^<]+)<\/h2>/g)].map(([, title]) => title);
-  assert.deepEqual(sections, ["Sidebar header", "Install it", "How to undo", "Header still there?"]);
+  assert.deepEqual(sections, ["Sidebar header and icon strip", "Install it", "How to undo", "Header or icon strip still there?"]);
 
   // Short copy, as everywhere else in Settings: a card says what it is in a
   // line or two, and every step is a name over one line.
@@ -1032,21 +1032,21 @@ test("the Optional Firefox Styling tab sits before Overview and stays short", as
   // all stated before the download button.
   const sheet = panel.slice(panel.indexOf('id="firefox-styling-sheet-heading"'), panel.indexOf('id="firefox-styling-install-heading"'));
   const sheetText = plain(sheet);
-  assert.match(sheetText, /This small file hides Firefox's header above every sidebar, including other extensions\. Firefox updates can break it\./);
+  assert.match(sheetText, /This small file hides Firefox's header above every sidebar, including other extensions, and the icon strip with Firefox's own vertical tabs\. Firefox updates can break it\./);
   assert.ok(sheet.indexOf("Firefox update") < sheet.indexOf('id="firefox-styling-download"'));
   assert.match(sheet, /<button id="firefox-styling-download" class="btn is-primary" type="button">Download CSS<\/button>\s*<span class="settings-note">Saves <code>userChrome\.css<\/code>\. Downloading changes nothing by itself\.<\/span>/);
   assert.equal(DOWNLOAD_FILENAME, "userChrome.css");
   assert.match(sheet, /id="firefox-styling-status" class="settings-status" role="status" aria-live="polite" hidden/);
 
-  // The drawing shows the header only before, keeps Firefox's icon strip in
-  // both, and is decoration: its caption says the same in words.
+  // The drawing shows the header and Firefox's icon strip only before, and is
+  // decoration: its caption says the same in words.
   const frames = [...sheet.matchAll(/<div class="styling-frame" aria-hidden="true">([\s\S]*?)<span class="styling-frame-label">([^<]+)<\/span>/g)]
     .map(([, drawing, label]) => ({ label, header: drawing.includes("styling-header"), launcher: drawing.includes("styling-launcher") }));
   assert.deepEqual(frames, [
     { label: "Now", header: true, launcher: true },
-    { label: "With the style sheet", header: false, launcher: true }
+    { label: "With the style sheet", header: false, launcher: false }
   ]);
-  assert.match(sheet, /<figcaption class="visually-hidden">[^<]*header bar[^<]*icon strip beside it stays[^<]*<\/figcaption>/);
+  assert.match(sheet, /<figcaption class="visually-hidden">[^<]*header bar[^<]*icon strip[^<]*both are gone[^<]*<\/figcaption>/);
 
   // Five steps as setting rows, three of them with the text to paste.
   const install = panel.slice(panel.indexOf('id="firefox-styling-install-heading"'), panel.indexOf('id="firefox-styling-undo-heading"'));
@@ -1082,7 +1082,7 @@ test("the Optional Firefox Styling tab sits before Overview and stays short", as
   assert.deepEqual(checks, ["Wrong profile", "Wrong name", "Preference off", "Not restarted", "After an update"]);
   assert.match(plain(panel), /not userChrome\(1\)\.css or userChrome\.css\.txt/);
   assert.match(plain(panel), /Terminus updates never replace your copy\./);
-  assert.match(plain(panel), /replace only the Terminus rule/);
+  assert.match(plain(panel), /replace only the Terminus rules/);
 
   // Optional in every sense: no stored setting, no status, no toggle.
   assert.doesNotMatch(panel, /state-pill|type="checkbox"|role="switch"|<input/);

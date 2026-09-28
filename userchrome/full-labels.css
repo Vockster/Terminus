@@ -1,8 +1,9 @@
 /* ============================================================
    Terminus sidebar — Full Labels, locked width
    ------------------------------------------------------------
-   Removes the Firefox sidebar panel header and locks the sidebar
-   to a comfortable width for Full Labels mode.
+   Removes the Firefox sidebar panel header and the icon strip
+   beside it, and locks the sidebar to a comfortable width for
+   Full Labels mode.
    Optional, and not part of the extension. Terminus does not
    read, write, detect, or depend on this file.
    ============================================================
@@ -27,7 +28,8 @@
    SWITCHING
 
      These three files are alternatives. All three remove the
-     Firefox sidebar panel header; they differ only in width.
+     Firefox sidebar panel header and icon strip; they differ only
+     in width.
      Copy whichever one you want over
      <profile>/chrome/userChrome.css  and restart.
 
@@ -42,8 +44,9 @@
 
    REMOVE
 
-     Delete the file. Fully quit and reopen. The header comes back
-     and Firefox is exactly as it ships. Nothing is left behind.
+     Delete the file. Fully quit and reopen. The header and icon
+     strip come back and Firefox is exactly as it ships. Nothing
+     is left behind.
 
      The pref from step 1 can stay on. It does nothing by itself.
 
@@ -57,17 +60,18 @@
      Terminus is at fault.
 
      Observed working on Firefox Developer Edition 157.0, Windows.
+     The icon strip rule matches the markup of Firefox 156 and
+     157; it is newer and not yet observed in use.
      Not verified on Firefox 153 ESR.
 
-   THE BUILT-IN LAUNCHER
+   THE ICON STRIP
 
-     Deliberately not handled here. Firefox has a real setting for
-     the icon strip beside the panel, and a supported setting beats
-     a CSS override that can break on update:
+     Firefox's icon strip (the launcher) holds its own vertical
+     tabs and sidebar shortcuts, so they go with it. Open and close
+     Terminus with the toolbar Sidebar button or View -> Sidebar.
 
-       right-click the launcher -> Customize Sidebar -> Hide sidebar
-
-     or set  sidebar.visibility = hide-launcher  in about:config.
+     Firefox's Customize Sidebar -> Hide sidebar is not the same:
+     it hides the whole sidebar, Terminus included.
 
    THE WIDTH, AND HOW TO CHANGE IT
 
@@ -88,6 +92,12 @@
 
 /* No sidebar panel header. */
 #sidebar-panel-header {
+  display: none !important;
+}
+
+/* No Firefox icon strip beside the sidebar. */
+#sidebar-container,
+#sidebar-launcher-splitter {
   display: none !important;
 }
 

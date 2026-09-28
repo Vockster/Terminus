@@ -879,14 +879,14 @@
           <header class="panel-header">
             <p class="eyebrow">Terminus</p>
             <h1 id="firefox-styling-heading">Optional Firefox Styling</h1>
-            <p>Hide the header bar Firefox draws above the sidebar. Optional: Terminus works the same without it.</p>
+            <p>Hide the header bar and icon strip Firefox draws around the sidebar. Optional: Terminus works the same without it.</p>
           </header>
 
           <section class="settings-card settings-card--lifted" aria-labelledby="firefox-styling-sheet-heading">
             <div class="settings-card-heading">
               <p class="settings-card-kicker">Style sheet</p>
-              <h2 id="firefox-styling-sheet-heading"><span class="card-icon card-icon--firefox-styling" aria-hidden="true"></span>Sidebar header</h2>
-              <p>This small file hides Firefox's header above every sidebar, including other extensions. Firefox updates can break it.</p>
+              <h2 id="firefox-styling-sheet-heading"><span class="card-icon card-icon--firefox-styling" aria-hidden="true"></span>Sidebar header and icon strip</h2>
+              <p>This small file hides Firefox's header above every sidebar, including other extensions, and the icon strip with Firefox's own vertical tabs. Firefox updates can break it.</p>
             </div>
             <figure class="styling-compare">
               <div class="styling-frame" aria-hidden="true">
@@ -900,15 +900,14 @@
                 <span class="styling-frame-label">Now</span>
               </div>
               <div class="styling-frame" aria-hidden="true">
-                <div class="styling-window">
-                  <span class="styling-launcher"><i></i><i></i><i></i></span>
+                <div class="styling-window is-panel-only">
                   <span class="styling-panel">
                     <i class="styling-line"></i><i class="styling-line is-current"></i><i class="styling-line is-short"></i>
                   </span>
                 </div>
                 <span class="styling-frame-label">With the style sheet</span>
               </div>
-              <figcaption class="visually-hidden">Now, a header bar reading Terminus sits above the sidebar. With the style sheet the sidebar starts at the top. Firefox's icon strip beside it stays in both.</figcaption>
+              <figcaption class="visually-hidden">Now, a header bar reading Terminus sits above the sidebar. Firefox's icon strip sits beside it. With the style sheet both are gone and the sidebar starts at the top.</figcaption>
             </figure>
             <p id="firefox-styling-status" class="settings-status" role="status" aria-live="polite" hidden></p>
             <div class="card-foot">
@@ -957,14 +956,14 @@
           <section class="settings-card" aria-labelledby="firefox-styling-help-heading">
             <div class="settings-card-heading">
               <p class="settings-card-kicker">Troubleshooting</p>
-              <h2 id="firefox-styling-help-heading">Header still there?</h2>
+              <h2 id="firefox-styling-help-heading">Header or icon strip still there?</h2>
             </div>
             <dl class="styling-checks">
               <div><dt>Wrong profile</dt><dd>Use the folder <code>about:support</code> opens in the Firefox you're using.</dd></div>
               <div><dt>Wrong name</dt><dd>It must be <code>chrome/userChrome.css</code> exactly, not <code>userChrome(1).css</code> or <code>userChrome.css.txt</code>.</dd></div>
               <div><dt>Preference off</dt><dd>The preference in step 4 must read <code>true</code>.</dd></div>
               <div><dt>Not restarted</dt><dd>Firefox reads the file only at startup. Quit it completely.</dd></div>
-              <div><dt>After an update</dt><dd>Firefox can rename the header, and Terminus updates never replace your copy. Download again and replace only the Terminus rule (or the whole file when it contains nothing else).</dd></div>
+              <div><dt>After an update</dt><dd>Firefox can rename the header or icon strip, and Terminus updates never replace your copy. Download again and replace only the Terminus rules (or the whole file when it contains nothing else).</dd></div>
             </dl>
           </section>
         </section>

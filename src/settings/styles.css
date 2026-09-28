@@ -3808,6 +3808,10 @@ input[type="radio"],
   background: #232229;
 }
 
+.styling-window.is-panel-only {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .styling-launcher {
   display: flex;
   flex-direction: column;
