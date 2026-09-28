@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-09-28
+
+### Changed
+
+- The optional style sheet also hides Firefox's icon strip beside the sidebar,
+  along with Firefox's own vertical tabs. Download it again from Optional
+  Firefox Styling in Settings to get the change.
+
 ## [0.1.1] - 2026-09-24
 
 ### Changed

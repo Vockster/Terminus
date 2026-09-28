@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { copyFileSync, existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { delimiter, dirname, extname, isAbsolute, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -126,45 +126,6 @@ function requireTrustedWebExtConfig() {
   }
 }
 
-// web-ext overwrites the ZIP in place, so the build it replaces would otherwise
-// be gone. Keep each outgoing archive beside the new one with a "B" suffix, so
-// there is always one previous package to fall back to.
-function backupPreviousArtifacts() {
-  let artifactsDir = "web-ext-artifacts";
-  try {
-    const packageJson = JSON.parse(readFileSync(repoPackagePath, "utf8"));
-    if (typeof packageJson.webExt?.artifactsDir === "string") {
-      artifactsDir = packageJson.webExt.artifactsDir;
-    }
-  } catch {
-    // The trusted-config check already reported anything wrong with this file.
-  }
-  const directory = join(repoRoot, artifactsDir);
-  if (!existsSync(directory)) {
-    return;
-  }
-  for (const entry of readdirSync(directory, { withFileTypes: true })) {
-    if (!entry.isFile()) {
-      continue;
-    }
-    const extension = extname(entry.name);
-    if (extension !== ".zip" && extension !== ".xpi") {
-      continue;
-    }
-    const base = entry.name.slice(0, -extension.length);
-    if (base.endsWith("B")) {
-      continue;
-    }
-    const backupName = `${base}B${extension}`;
-    try {
-      copyFileSync(join(directory, entry.name), join(directory, backupName));
-      console.log(`Kept the previous build as ${backupName}`);
-    } catch (error) {
-      fail(`the previous build could not be backed up as ${backupName}: ${error.message}`);
-    }
-  }
-}
-
 function requireSafeForwardedArgs() {
   try {
     validateForwardedWebExtArgs(forwardedArgs);
@@ -235,7 +196,6 @@ switch (command) {
     requireManifest();
     requireTrustedWebExtConfig();
     requireSafeForwardedArgs();
-    backupPreviousArtifacts();
     const { cliPath } = loadWebExt();
     runProcess(
       process.execPath,
