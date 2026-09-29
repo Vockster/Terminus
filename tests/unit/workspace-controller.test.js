@@ -3982,6 +3982,35 @@ test("workspace removal preserves live tabs under the next cyclic rail workspace
   assert.equal(harness.getTabs().find(({ id }) => id === 11).active, true);
 });
 
+test("workspace removal proceeds while a window has an unfinished operation", async () => {
+  const runtime = branchRuntime([[11], [12]]);
+  runtime.windows[0].pendingOperation = { id: "operation-stuck", kind: "activate-workspace" };
+  const safetyCalls = [];
+  const harness = createHarness(
+    [tab(11, 7, 0, true), tab(12, 7, 1, false)],
+    {
+      initialRuntime: runtime,
+      settingsService: {
+        async getOrInitialize() { return { marker: "settings" }; }
+      },
+      snapshotService: {
+        async createFromInventory(inventory, settings, options) {
+          safetyCalls.push({ pending: inventory.runtime.windows[0].pendingOperation, options });
+        }
+      }
+    }
+  );
+
+  // A window that never settles must not block removal indefinitely: the
+  // safety snapshot captures the unsettled inventory and removal continues.
+  await harness.controller.removeWorkspace(7, WORK_ID);
+
+  assert.equal(safetyCalls.length, 1);
+  assert.equal(safetyCalls[0].options.reason, "workspace-removal");
+  assert.notEqual(safetyCalls[0].pending, null);
+  assert.equal(harness.getState().workspaces.some(({ id }) => id === WORK_ID), false);
+});
+
 test("workspace removal stops before mutation when its safety snapshot fails", async () => {
   const safetyCalls = [];
   const harness = createHarness(
@@ -6906,6 +6935,27 @@ test("a new tab Firefox opens inside a branch joins that branch instead of split
     ["tab-14", "tab-11"],
     ["tab-12", "tab-11"],
     ["tab-13", "tab-11"]
+  ]);
+});
+
+test("a pre-0.1.1 split branch never hides its intervening root inside the branch", async () => {
+  // Persisted 0.1.0 state: collapsed 11, root 12 between 11 and 11's
+  // children. Repair must not adopt 12 under collapsed 11; the child cut
+  // off from 11 becomes a root and keeps its own subtree.
+  const runtime = branchRuntime([[11], [12], [13, 11], [14, 13]]);
+  runtime.windows[0].workspaceLayouts[0].tree[0].collapsed = true;
+  const harness = createHarness(
+    [tab(11, 7, 0, true), tab(12, 7, 1, false), tab(13, 7, 2, false), tab(14, 7, 3, false)],
+    { initialRuntime: runtime }
+  );
+
+  await harness.controller.reconcileWindow(7);
+
+  assert.deepEqual(workTreeParents(harness), [
+    ["tab-11", null],
+    ["tab-12", null],
+    ["tab-13", null],
+    ["tab-14", "tab-13"]
   ]);
 });
 

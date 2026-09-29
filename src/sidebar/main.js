@@ -29,6 +29,7 @@ import {
   parseTabClosePreflight
 } from "../contracts/tab-close.js";
 import { parseTabContainerMoveOutcome } from "../contracts/tab-container-move.js";
+import { SNAPSHOT_ERROR_MESSAGES } from "../contracts/snapshots.js";
 import {
   containerMoveAssignment,
   createContainerMoveDialog
@@ -1078,6 +1079,10 @@ async function runMutation(message, pendingText, applyResponse) {
     if (!response || response.ok !== true) {
       if (CONTAINER_ERROR_MESSAGES[response?.error?.code]) {
         showContainerError(response.error.code);
+      } else if (SNAPSHOT_ERROR_MESSAGES[response?.error?.code]) {
+        // A mutation's safety snapshot failed; its own message names the
+        // cause instead of "Workspace data could not be loaded."
+        showStatus(SNAPSHOT_ERROR_MESSAGES[response.error.code], "error");
       } else {
         showError(response?.error?.code, false);
       }

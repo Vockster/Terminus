@@ -77,7 +77,13 @@ function groupIdByTab(layout) {
 // following siblings off from their parent. `preferredParents` carries opener
 // parents for tabs first seen in this pass and outranks their placeholder node.
 // Those tabs only fit themselves in; they never reshape the rows around them.
-export function repairWorkspaceTree(layout, { preferredParents = null } = {}) {
+// `newTabIds` marks tabs placed into this layout during the current pass:
+// their root nodes are placeholders, not durable positions, so they may
+// still be fitted into a surrounding branch.
+export function repairWorkspaceTree(
+  layout,
+  { preferredParents = null, newTabIds = null } = {}
+) {
   const previous = Array.isArray(layout.tree) ? layout.tree : [];
   const previousByTabId = new Map(previous.map((node) => [node.tabId, node]));
   const pinned = new Set(layout.pinnedTabIds);
@@ -100,7 +106,18 @@ export function repairWorkspaceTree(layout, { preferredParents = null } = {}) {
     const floor = nextParent !== null && canParent(nextTabId, nextParent)
       ? candidates.indexOf(nextParent)
       : -1;
-    const allowed = floor >= 0 ? candidates.slice(floor) : [null, ...candidates];
+    // A tab that was a root stays one: adopting it into the surrounding
+    // branch would hide it inside a possibly collapsed parent, which is how
+    // pre-0.1.1 layouts with split branches lost tabs from view. The
+    // following child that can no longer reach its parent becomes a root
+    // instead.
+    const wasRoot = oldNode !== undefined &&
+      oldNode.parentTabId === null &&
+      !preferredParents?.has(tabId) &&
+      !newTabIds?.has(tabId);
+    const allowed = floor >= 0 && !wasRoot
+      ? candidates.slice(floor)
+      : [null, ...candidates];
     const choices = [
       preferredParents?.get(tabId),
       oldNode?.parentTabId ?? null,
@@ -412,7 +429,11 @@ export function captureWorkspaceLayout({
   createGroupId,
   reservedGroupIds = new Set(),
   createSplitViewId,
-  reservedSplitViewIds = new Set()
+  reservedSplitViewIds = new Set(),
+  // Forwarded to the tree repair so a first-seen tab's placeholder root is
+  // not mistaken for a durable root during the capture's own repair.
+  preferredParents = null,
+  newTabIds = null
 }) {
   const layout = ensureWorkspaceLayout(windowRuntime, workspaceId);
   const previous = {
@@ -536,7 +557,7 @@ export function captureWorkspaceLayout({
   layout.groups = groups;
   layout.splitViews = splitViews;
   layout.tree = previous.tree;
-  repairWorkspaceTree(layout);
+  repairWorkspaceTree(layout, { preferredParents, newTabIds });
   nestNewSplitViews(layout, previous.splitViews);
 
   return {

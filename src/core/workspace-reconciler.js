@@ -896,12 +896,17 @@ export class WorkspaceReconciler {
     }
 
     const liveOwnerByTabId = new Map();
+    // Tabs placed into a layout during this pass carry placeholder root
+    // nodes; the tree repair may still fit them into a surrounding branch,
+    // unlike durable roots from an earlier pass.
+    const placedTabIds = new Set();
     for (const context of contexts.values()) {
       for (const tab of context.tabs) {
         liveOwnerByTabId.set(tab.logicalId, context.windowRuntime.id);
         let placement = findWorkspaceLayoutForTab(context.windowRuntime, tab.logicalId);
         const workspaceId = assignmentByTabId.get(tab.logicalId);
         if (!placement || placement.layout.workspaceId !== workspaceId) {
+          placedTabIds.add(tab.logicalId);
           const prior = previousPlacement.get(tab.logicalId);
           if (prior?.group) {
             relocatedGroups.set(prior.group.id, {
@@ -957,7 +962,10 @@ export class WorkspaceReconciler {
       }
     }
     for (const layout of inheritedLayouts) {
-      changed = repairWorkspaceTree(layout, { preferredParents: inheritedParentByTabId }) || changed;
+      changed = repairWorkspaceTree(layout, {
+        preferredParents: inheritedParentByTabId,
+        newTabIds: placedTabIds
+      }) || changed;
     }
 
     const rememberedTabIds = new Set();
@@ -1062,11 +1070,14 @@ export class WorkspaceReconciler {
             createGroupId: () => this.#browser.createLogicalGroupId(),
             reservedGroupIds: groupIdsOutsideLayout(runtime, layout),
             createSplitViewId: () => this.#browser.createLogicalSplitViewId(),
-            reservedSplitViewIds: splitViewIdsOutsideLayout(runtime, layout)
+            reservedSplitViewIds: splitViewIdsOutsideLayout(runtime, layout),
+            preferredParents: inheritedParentByTabId,
+            newTabIds: placedTabIds
           });
           changed = result.changed || changed;
           changed = repairWorkspaceTree(result.layout, {
-            preferredParents: inheritedParentByTabId
+            preferredParents: inheritedParentByTabId,
+            newTabIds: placedTabIds
           }) || changed;
           for (const tab of context.tabs.filter(
             (entry) => assignmentByTabId.get(entry.logicalId) === workspaceId

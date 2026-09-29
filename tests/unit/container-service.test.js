@@ -25,7 +25,13 @@ function memoryStorage(initialValue) {
   };
 }
 
-function fakeBrowser({ capability = CONTAINER_CAPABILITIES.AVAILABLE, identities = [work] } = {}) {
+function fakeBrowser({
+  capability = CONTAINER_CAPABILITIES.AVAILABLE,
+  // Identity reads need only the install-time contextualIdentities
+  // permission, so they stay available while `cookies` is revoked.
+  readCapability = CONTAINER_CAPABILITIES.AVAILABLE,
+  identities = [work]
+} = {}) {
   let live = structuredClone(identities);
   let listener;
   let nextContainerId = 2;
@@ -33,6 +39,7 @@ function fakeBrowser({ capability = CONTAINER_CAPABILITIES.AVAILABLE, identities
     setLive(next) { live = structuredClone(next); },
     emit(type) { listener?.(type); },
     async capability() { return capability; },
+    async readCapability() { return readCapability; },
     async list() { return structuredClone(live); },
     async supportedOptions() {
       return {
@@ -122,7 +129,37 @@ test("rename updates descriptors and deletion retains an unavailable reference",
   assert.equal(storage.value().bindings[0].cookieStoreId, null);
 });
 
-test("authoritative native deletion reports every logical alias before clearing bindings", async () => {
+test("a transiently missing identity keeps its ref, defaults and re-links on return", async () => {
+  const storage = memoryStorage(undefined);
+  const browser = fakeBrowser();
+  let cleared = 0;
+  const service = new ContainerService({
+    storage,
+    browserAdapter: browser,
+    idGenerator: () => "work",
+    async onBindingsRemoved() { cleared += 1; }
+  });
+  await service.overview();
+  // Firefox briefly reports no identities (for example while an add-on
+  // reloads): the binding loses its native link but keeps its ref, and no
+  // workspace default is cleared.
+  browser.setLive([]);
+  await service.refresh();
+  assert.equal(cleared, 0);
+  assert.equal(storage.value().bindings[0].refId, "ctr-work");
+  assert.equal(storage.value().bindings[0].cookieStoreId, null);
+  // The identity returns: it re-links to the same ref by exact descriptor
+  // match instead of minting a fresh one, so preserved defaults point at
+  // the identity again.
+  browser.setLive([work]);
+  await service.refresh();
+  assert.equal(storage.value().bindings.length, 1);
+  assert.equal(storage.value().bindings[0].refId, "ctr-work");
+  assert.equal(storage.value().bindings[0].cookieStoreId, work.cookieStoreId);
+  assert.equal(cleared, 0);
+});
+
+test("authoritative native deletion reports every logical alias after unbinding", async () => {
   const storage = memoryStorage({
     schemaVersion: 1,
     bindings: [
@@ -139,14 +176,19 @@ test("authoritative native deletion reports every logical alias before clearing 
     ]
   });
   const removed = [];
+  const browser = fakeBrowser({ identities: [] });
   const service = new ContainerService({
     storage,
-    browserAdapter: fakeBrowser({ identities: [] }),
+    browserAdapter: browser,
     async onBindingsRemoved(refIds) {
       removed.push([...refIds]);
-      assert.ok(storage.value().bindings.every(({ cookieStoreId }) => cookieStoreId !== null));
+      // Bindings are unbound before defaults clear, so a crash between the
+      // two leaves an unavailable default rather than a dangling binding.
+      assert.ok(storage.value().bindings.every(({ cookieStoreId }) => cookieStoreId === null));
     }
   });
+  service.start();
+  browser.emit({ kind: "identity-removed", cookieStoreId: "firefox-container-1" });
 
   await service.refresh();
 
@@ -410,7 +452,23 @@ test("explicit default stores map to No Container without optional permissions",
   assert.deepEqual(await service.assignmentForCookieStore("firefox-private"), { kind: "none" });
 });
 
-test("revoked permission cannot turn previously used container tabs into No Container", async () => {
+test("container tabs resolve to their real container while container support is off", async () => {
+  // The optional `cookies` grant is absent, so full capability reports
+  // permission-required, but identity reads still work: a snapshot or
+  // safety capture records the real container instead of failing.
+  const service = new ContainerService({
+    storage: memoryStorage(undefined),
+    browserAdapter: fakeBrowser({ capability: CONTAINER_CAPABILITIES.PERMISSION_REQUIRED })
+  });
+  const assignments = await service.assignmentsForCookieStores([
+    "firefox-container-1",
+    "firefox-default"
+  ]);
+  assert.equal(assignments[0].kind, "container");
+  assert.equal(assignments[1].kind, "none");
+});
+
+test("unreadable identities cannot turn container tabs into No Container", async () => {
   const service = new ContainerService({
     storage: memoryStorage({
       schemaVersion: 1,
@@ -425,10 +483,13 @@ test("revoked permission cannot turn previously used container tabs into No Cont
         cookieStoreId: "firefox-container-1"
       }]
     }),
-    browserAdapter: fakeBrowser({ capability: CONTAINER_CAPABILITIES.PERMISSION_REQUIRED })
+    browserAdapter: fakeBrowser({
+      capability: CONTAINER_CAPABILITIES.PERMISSION_REQUIRED,
+      readCapability: CONTAINER_CAPABILITIES.PERMISSION_REQUIRED
+    })
   });
   await assert.rejects(
-    service.assignmentsForCookieStores([undefined, "firefox-default"]),
+    service.assignmentsForCookieStores(["firefox-container-1", "firefox-default"]),
     (error) => error.code === CONTAINER_ERROR_CODES.PERMISSION_REQUIRED
   );
 });

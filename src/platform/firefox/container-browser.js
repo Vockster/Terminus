@@ -89,8 +89,33 @@ export function createFirefoxContainerBrowser(browserApi) {
     throw permissionRequired();
   }
 
+  // Reading identities needs only the install-time `contextualIdentities`
+  // permission. The optional `cookies` permission gates container-tab
+  // creation, never observation, so snapshots and safety captures can record
+  // real containers while container support is off.
+  async function readCapability({ privateContext = false } = {}) {
+    if (privateContext) return CONTAINER_CAPABILITIES.PRIVATE_UNAVAILABLE;
+    if (!identities || !permissions?.contains) return CONTAINER_CAPABILITIES.UNSUPPORTED;
+    const contextual = await permissions.contains({
+      permissions: [...CONTAINER_REQUIRED_PERMISSIONS]
+    });
+    return contextual
+      ? CONTAINER_CAPABILITIES.AVAILABLE
+      : CONTAINER_CAPABILITIES.PERMISSION_REQUIRED;
+  }
+
+  async function assertReadable(options) {
+    const state = await readCapability(options);
+    if (state === CONTAINER_CAPABILITIES.AVAILABLE) return;
+    if (state === CONTAINER_CAPABILITIES.UNSUPPORTED) throw unsupported();
+    if (state === CONTAINER_CAPABILITIES.PRIVATE_UNAVAILABLE) {
+      throw new ContainerError(CONTAINER_ERROR_CODES.PRIVATE_UNAVAILABLE);
+    }
+    throw permissionRequired();
+  }
+
   async function list() {
-    await assertAvailable();
+    await assertReadable();
     return (await identities.query({})).map(normalizeNativeIdentity);
   }
 
@@ -196,6 +221,7 @@ export function createFirefoxContainerBrowser(browserApi) {
 
   return Object.freeze({
     capability,
+    readCapability,
     assertAvailable,
     list,
     supportedOptions,

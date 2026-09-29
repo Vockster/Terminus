@@ -123,14 +123,77 @@ test("capture describes only open windows, not records kept for closed ones", as
   assert.deepEqual(await service.capture(inventory), fixture);
 });
 
-test("capture refuses pending workspace operations before storing URLs", async () => {
+test("capture proceeds during a pending workspace operation", async () => {
+  const fixture = createSnapshotPayloadFixture();
   const service = new SnapshotCaptureService({
-    async captureWindows() { assert.fail("blocked capture must not read URL-bearing tabs"); }
+    async captureWindows() {
+      return [{
+        firefoxWindowId: 7,
+        geometry: fixture.windows[0].geometry,
+        tabs: fixture.windows[0].workspaceLayouts[0].tabs.map((tab, index) => ({
+          firefoxTabId: 20 + index,
+          url: tab.url,
+          title: tab.title,
+          active: tab.active,
+          highlighted: tab.highlighted,
+          discarded: tab.discarded,
+          cookieStoreId: "firefox-default"
+        }))
+      }];
+    }
+  }, {
+    containerService: {
+      async assignmentsForCookieStores(cookieStoreIds) {
+        return cookieStoreIds.map(() => ({ kind: "none" }));
+      },
+      async projectCatalog() { return []; }
+    }
   });
-  await assert.rejects(
-    service.capture(inventoryFixture({ pending: true })),
-    (error) => error.code === SNAPSHOT_ERROR_CODES.RESTORE_BLOCKED
-  );
+  // An unsettled window captures its last saved layouts plus live pages
+  // instead of blocking snapshots and removal indefinitely.
+  assert.deepEqual(await service.capture(inventoryFixture({ pending: true })), fixture);
+});
+
+test("capture omits a tab Firefox no longer reports and prunes its structures", async () => {
+  const fixture = createSnapshotPayloadFixture();
+  const inventory = inventoryFixture();
+  const layoutTabs = fixture.windows[0].workspaceLayouts[0].tabs;
+  const droppedId = layoutTabs[layoutTabs.length - 1].id;
+  const service = new SnapshotCaptureService({
+    async captureWindows() {
+      return [{
+        firefoxWindowId: 7,
+        geometry: fixture.windows[0].geometry,
+        // The last layout tab closed mid-operation and is absent here.
+        tabs: layoutTabs.slice(0, -1).map((tab, index) => ({
+          firefoxTabId: 20 + index,
+          url: tab.url,
+          title: tab.title,
+          active: tab.active,
+          highlighted: tab.highlighted,
+          discarded: tab.discarded,
+          cookieStoreId: "firefox-default"
+        }))
+      }];
+    }
+  }, {
+    containerService: {
+      async assignmentsForCookieStores(cookieStoreIds) {
+        return cookieStoreIds.map(() => ({ kind: "none" }));
+      },
+      async projectCatalog() { return []; }
+    }
+  });
+  const payload = await service.capture(inventory);
+  const captured = payload.windows[0].workspaceLayouts[0];
+  assert.ok(!captured.tabs.some(({ id }) => id === droppedId));
+  assert.ok(!captured.pinnedTabIds.includes(droppedId));
+  assert.ok(!captured.tree.some((node) =>
+    node.tabId === droppedId || node.parentTabId === droppedId
+  ));
+  assert.ok(!captured.groups.some((group) => group.tabIds.includes(droppedId)));
+  assert.ok(!captured.splitViews.some((split) => split.tabIds.includes(droppedId)));
+  assert.ok(!payload.windows[0].selectedTabs.some(({ tabId }) => tabId === droppedId));
 });
 
 test("capture records mixed tab assignments and the exact referenced catalog", async () => {

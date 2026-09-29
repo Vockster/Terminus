@@ -1205,18 +1205,37 @@ function parents(layout) {
   return Object.fromEntries(layout.tree.map(({ tabId, parentTabId }) => [tabId, parentTabId]));
 }
 
-test("tree repair fits a tab that lands inside a branch into that branch", () => {
+test("tree repair fits a first-seen tab that lands inside a branch into that branch", () => {
+  // Only a tab with no previous node adopts; delete n's node so it is new.
   const between = rowsLayout([["a"], ["n"], ["b", "a"]]);
+  between.tree = between.tree.filter(({ tabId }) => tabId !== "n");
   assert.equal(repairWorkspaceTree(between), true);
   assert.deepEqual(parents(between), { a: null, n: "a", b: "a" });
-
-  const afterChild = rowsLayout([["a"], ["b", "a"], ["n"], ["c", "a"]]);
-  repairWorkspaceTree(afterChild);
-  assert.deepEqual(parents(afterChild), { a: null, b: "a", n: "a", c: "a" });
 
   const atEnd = rowsLayout([["a"], ["b", "a"], ["n"]]);
   assert.equal(repairWorkspaceTree(atEnd), false);
   assert.deepEqual(parents(atEnd), { a: null, b: "a", n: null });
+});
+
+test("tree repair never adopts a known root into the surrounding branch", () => {
+  // n was a root: it stays one, and the child cut off from its parent
+  // becomes a root instead of the root being swallowed by the branch.
+  const between = rowsLayout([["a"], ["n"], ["b", "a"]]);
+  assert.equal(repairWorkspaceTree(between), true);
+  assert.deepEqual(parents(between), { a: null, n: null, b: null });
+
+  const afterChild = rowsLayout([["a"], ["b", "a"], ["n"], ["c", "a"]]);
+  repairWorkspaceTree(afterChild);
+  assert.deepEqual(parents(afterChild), { a: null, b: "a", n: null, c: null });
+});
+
+test("tree repair keeps a pre-0.1.1 split-branch root visible outside a collapsed branch", () => {
+  // Persisted 0.1.0 order: A(collapsed), B(root), C under A, D under C.
+  // B must never be pulled inside collapsed A; C loses A but keeps D.
+  const legacy = rowsLayout([["a"], ["b"], ["c", "a"], ["d", "c"]]);
+  legacy.tree[0].collapsed = true;
+  repairWorkspaceTree(legacy);
+  assert.deepEqual(parents(legacy), { a: null, b: null, c: null, d: "c" });
 });
 
 test("tree repair keeps an opener parent only where the tab landed inside its branch", () => {

@@ -3,6 +3,8 @@ import {
   WORKSPACE_STATE_ERROR_MESSAGES,
   WorkspaceStateError
 } from "./workspace-state.js";
+import { SNAPSHOT_ERROR_MESSAGES, SnapshotError } from "./snapshots.js";
+import { CONTAINER_ERROR_MESSAGES, ContainerError } from "./containers.js";
 
 export const WORKSPACE_MESSAGE_TYPES = Object.freeze({
   GET_STATE: "workspaceState.get",
@@ -99,6 +101,21 @@ export function workspaceNoticeAcknowledgedSuccess(acknowledged) {
 }
 
 export function workspaceStateFailure(error) {
+  // A workspace action can fail inside its safety snapshot or container
+  // lookup; collapsing those to "Workspace data could not be loaded." hides
+  // the real cause, so their codes and messages pass through.
+  if (error instanceof SnapshotError && SNAPSHOT_ERROR_MESSAGES[error.code]) {
+    return {
+      ok: false,
+      error: { code: error.code, message: SNAPSHOT_ERROR_MESSAGES[error.code] }
+    };
+  }
+  if (error instanceof ContainerError && CONTAINER_ERROR_MESSAGES[error.code]) {
+    return {
+      ok: false,
+      error: { code: error.code, message: CONTAINER_ERROR_MESSAGES[error.code] }
+    };
+  }
   const code =
     error instanceof WorkspaceStateError && WORKSPACE_STATE_ERROR_MESSAGES[error.code]
       ? error.code

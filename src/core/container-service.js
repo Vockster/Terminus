@@ -61,7 +61,30 @@ export class ContainerService {
   start(onChanged = null) {
     if (this.#unsubscribe) return;
     this.#onChanged = typeof onChanged === "function" ? onChanged : null;
-    this.#unsubscribe = this.#browser.subscribe(() => this.#browserEventHint());
+    this.#unsubscribe = this.#browser.subscribe((event) => {
+      // Only Firefox's own removal event is authoritative deletion. A
+      // reconcile that merely fails to see an identity must not clear
+      // workspace defaults (see #reconcile).
+      if (event?.kind === "identity-removed" && typeof event.cookieStoreId === "string") {
+        void this.#identityRemoved(event.cookieStoreId).catch(() => undefined);
+      }
+      this.#browserEventHint();
+    });
+  }
+
+  #identityRemoved(cookieStoreId) {
+    return this.#executor.run(async () => {
+      const state = await this.#load();
+      const removedRefIds = state.bindings
+        .filter((entry) => entry.cookieStoreId === cookieStoreId)
+        .map(({ refId }) => refId);
+      if (removedRefIds.length === 0) return;
+      const bindings = state.bindings.map((entry) =>
+        entry.cookieStoreId === cookieStoreId ? { ...entry, cookieStoreId: null } : entry
+      );
+      await this.#write({ schemaVersion: CONTAINER_STATE_SCHEMA_VERSION, bindings });
+      await this.#onBindingsRemoved?.(removedRefIds);
+    });
   }
 
   stop() {
@@ -151,7 +174,9 @@ export class ContainerService {
   assignmentForCookieStore(cookieStoreId) {
     return this.#executor.run(async () => {
       if (isDefaultCookieStore(cookieStoreId)) return noContainerAssignment();
-      const capability = await this.#browser.capability();
+      // Observation needs only identity reads, so a snapshot can record a
+      // container tab while container support (the `cookies` grant) is off.
+      const capability = await this.#browser.readCapability();
       if (capability !== CONTAINER_CAPABILITIES.AVAILABLE) {
         throw new ContainerError(CONTAINER_ERROR_CODES.PERMISSION_REQUIRED);
       }
@@ -170,17 +195,13 @@ export class ContainerService {
       const requiresContainers = cookieStoreIds.some((cookieStoreId) =>
         !isDefaultCookieStore(cookieStoreId)
       );
+      // Only tabs actually in a container need identity data; bindings alone
+      // never block a capture of ordinary tabs.
       if (!requiresContainers) {
-        const state = await this.#load();
-        if (state.bindings.length > 0) {
-          const capability = await this.#browser.capability();
-          if (capability !== CONTAINER_CAPABILITIES.AVAILABLE) {
-            throw new ContainerError(CONTAINER_ERROR_CODES.PERMISSION_REQUIRED);
-          }
-        }
         return cookieStoreIds.map(() => noContainerAssignment());
       }
-      const capability = await this.#browser.capability();
+      // Observation needs only identity reads (see assignmentForCookieStore).
+      const capability = await this.#browser.readCapability();
       if (capability !== CONTAINER_CAPABILITIES.AVAILABLE) {
         throw new ContainerError(CONTAINER_ERROR_CODES.PERMISSION_REQUIRED);
       }
@@ -392,9 +413,10 @@ export class ContainerService {
       cookieStoreId === null ? [] : [cookieStoreId]
     ));
     const usedRefs = new Set(state.bindings.map(({ refId }) => refId));
-    const removedRefIds = state.bindings
-      .filter(({ cookieStoreId }) => cookieStoreId !== null && !byNative.has(cookieStoreId))
-      .map(({ refId }) => refId);
+    // An identity missing from one query is only unavailable, not deleted:
+    // its binding keeps the ref and loses the native link, and workspace
+    // defaults stay put. Authoritative deletion arrives through Firefox's
+    // removal event (#identityRemoved).
     const bindings = state.bindings.map((entry) => {
       const native = entry.cookieStoreId === null ? null : byNative.get(entry.cookieStoreId);
       return native
@@ -406,6 +428,23 @@ export class ContainerService {
     });
     for (const native of live) {
       if (claimed.has(native.cookieStoreId)) continue;
+      // An identity returning after a transient absence re-links to its old
+      // ref by exact descriptor match, so a preserved workspace default
+      // points at the identity again instead of a dead ref.
+      const returning = bindings.find((entry) =>
+        entry.cookieStoreId === null &&
+        entry.descriptor.name === native.name &&
+        entry.descriptor.color === native.color &&
+        entry.descriptor.icon === native.icon
+      );
+      if (returning) {
+        returning.cookieStoreId = native.cookieStoreId;
+        returning.descriptor = this.#descriptorFromNative(
+          native,
+          returning.descriptor.sidebarsIcon
+        );
+        continue;
+      }
       bindings.push({
         refId: this.#createRef(usedRefs),
         descriptor: this.#descriptorFromNative(native),
@@ -419,9 +458,6 @@ export class ContainerService {
     if (JSON.stringify(reconciled) === JSON.stringify(state)) {
       this.#cachedState = state;
       return state;
-    }
-    if (removedRefIds.length > 0) {
-      await this.#onBindingsRemoved?.(removedRefIds);
     }
     return this.#write(reconciled);
   }

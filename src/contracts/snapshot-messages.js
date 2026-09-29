@@ -3,6 +3,7 @@ import {
   SNAPSHOT_ERROR_MESSAGES,
   SnapshotError
 } from "./snapshots.js";
+import { CONTAINER_ERROR_MESSAGES, ContainerError } from "./containers.js";
 import { parseSettingsState } from "./settings-state.js";
 import { publicMessageWithDetail } from "./public-error-detail.js";
 
@@ -59,6 +60,14 @@ export function snapshotSuccess(result) {
 }
 
 export function snapshotFailure(error) {
+  // A capture can fail in its container lookup; the container code and
+  // message say more than "The snapshot operation could not be completed."
+  if (error instanceof ContainerError && CONTAINER_ERROR_MESSAGES[error.code]) {
+    return {
+      ok: false,
+      error: { code: error.code, message: CONTAINER_ERROR_MESSAGES[error.code] }
+    };
+  }
   const code =
     error instanceof SnapshotError && SNAPSHOT_ERROR_MESSAGES[error.code]
       ? error.code
