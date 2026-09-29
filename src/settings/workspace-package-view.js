@@ -109,8 +109,18 @@ export function createWorkspacePackageView({
       if (!granted) {
         throw new Error("Allow Downloads access to save files.");
       }
-      const { filename } = await client.exportSetup();
-      report(`Saved ${filename}.`);
+      const { filename, fallbackIconWorkspaces } = await client.exportSetup();
+      if (Array.isArray(fallbackIconWorkspaces) && fallbackIconWorkspaces.length > 0) {
+        // The icon bytes could not be read, so the file carries House for
+        // these workspaces; saying so beats a silent substitution.
+        report(
+          `Saved ${filename}. The icon for ${fallbackIconWorkspaces.join(", ")} ` +
+            "could not be read, so the file uses the House icon there.",
+          { error: true }
+        );
+      } else {
+        report(`Saved ${filename}.`);
+      }
     } catch (error) {
       report(error.message, { error: true });
     } finally {

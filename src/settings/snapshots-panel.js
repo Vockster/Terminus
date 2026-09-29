@@ -961,6 +961,31 @@ export function createSnapshotsPanel({
     for (const record of records) {
       const row = document.createElement("div");
       row.className = "settings-backup-row";
+      if (record.damaged === true) {
+        // The stored backup could not be read; it is shown rather than
+        // silently missing, and only deletion applies.
+        const copy = document.createElement("span");
+        const title = document.createElement("strong");
+        title.textContent = "Damaged settings backup";
+        const meta = document.createElement("small");
+        meta.textContent = "This backup could not be read.";
+        copy.append(title, meta);
+        const actions = document.createElement("span");
+        actions.className = "settings-backup-actions";
+        actions.append(
+          button("Delete", (event) => {
+            void run(
+              event.currentTarget,
+              "Deleting settings backup…",
+              () => client.deleteSettings(record.id),
+              "Settings backup deleted."
+            );
+          }, "is-danger")
+        );
+        row.append(copy, actions);
+        settingsBackupList.append(row);
+        continue;
+      }
       const copy = document.createElement("span");
       const title = document.createElement("strong");
       title.textContent = record.reason === SETTINGS_BACKUP_REASONS.FIREFOX_SYNC_IMPORT

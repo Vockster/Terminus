@@ -330,3 +330,40 @@ test("upgrading version 2 assigns unpartitioned rows only to the default identit
     "3".repeat(64)
   ), null);
 });
+
+test("one damaged row hides only itself from lookups and the gallery", async () => {
+  const factory = new FakeIndexedDBFactory();
+  const storage = new FirefoxFaviconCacheStorage({
+    indexedDB: factory,
+    databaseName: "storage-damaged-row"
+  });
+  await storage.putIcon(icon("https://kept.invalid", 5, "a", 10), 0);
+
+  // A corrupt row lands beside the good one, as after storage damage.
+  const database = await new Promise((resolve) => {
+    const request = factory.open("storage-damaged-row", 3);
+    request.onsuccess = () => resolve(request.result);
+  });
+  await new Promise((resolve, reject) => {
+    const transaction = database.transaction("sources", "readwrite");
+    transaction.objectStore("sources").put({
+      key: "default https://bad.invalid zz",
+      partition: "default",
+      partitionOrigin: "default https://bad.invalid",
+      origin: "https://bad.invalid",
+      blob: "not-a-blob"
+    });
+    transaction.oncomplete = resolve;
+    transaction.onerror = () => reject(transaction.error);
+  });
+  database.close();
+
+  const page = await storage.listPage({ offset: 0, limit: 10 });
+  assert.deepEqual(page.records.map(({ origin }) => origin), ["https://kept.invalid"]);
+  const icons = await storage.getIconsForOrigins([
+    "https://bad.invalid",
+    "https://kept.invalid"
+  ]);
+  assert.deepEqual(icons.map(({ origin }) => origin), ["https://kept.invalid"]);
+  storage.close();
+});

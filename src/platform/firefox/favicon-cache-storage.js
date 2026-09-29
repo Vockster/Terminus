@@ -296,7 +296,9 @@ export class FirefoxFaviconCacheStorage {
       const groups = await Promise.all(unique.map(({ partition, origin }) =>
         requestResult(index.getAll(`${partition} ${origin}`))
       ));
-      return groups.flat().map(parseFaviconIconRecord);
+      // One damaged row must not hide a site's other icons.
+      return groups.flat().map((value) => tryParse(parseFaviconIconRecord, value))
+        .filter((record) => record !== null);
     });
   }
 
@@ -306,7 +308,8 @@ export class FirefoxFaviconCacheStorage {
       const value = await requestResult(
         transaction.objectStore(SOURCES_STORE).get(faviconSourceKey(partition, origin, sourceDigest))
       );
-      return value === undefined ? null : parseFaviconIconRecord(value);
+      // A damaged row reads as a miss, so a fresh fetch overwrites it.
+      return value === undefined ? null : tryParse(parseFaviconIconRecord, value);
     });
   }
 
@@ -318,7 +321,7 @@ export class FirefoxFaviconCacheStorage {
           faviconSourceKey(partition, origin, sourceDigest)
         )
       );
-      return value === undefined ? null : parseFaviconFailureRecord(value);
+      return value === undefined ? null : tryParse(parseFaviconFailureRecord, value);
     });
   }
 
@@ -327,8 +330,8 @@ export class FirefoxFaviconCacheStorage {
     return runTransaction(database, SOURCE_FAILURES_STORE, "readonly", async (transaction) => {
       const values = await requestResult(transaction.objectStore(SOURCE_FAILURES_STORE).getAll());
       return values
-        .map(parseFaviconFailureRecord)
-        .filter(({ accessOrigin }) => accessOrigin !== null);
+        .map((value) => tryParse(parseFaviconFailureRecord, value))
+        .filter((record) => record !== null && record.accessOrigin !== null);
     });
   }
 
@@ -442,7 +445,9 @@ export class FirefoxFaviconCacheStorage {
     const database = await this.#databaseHandle();
     return runTransaction(database, SOURCES_STORE, "readonly", async (transaction) => {
       const values = await requestResult(transaction.objectStore(SOURCES_STORE).getAll());
-      return values.map(parseFaviconIconRecord).sort((a, b) => a.lastAccessedAt - b.lastAccessedAt);
+      return values.map((value) => tryParse(parseFaviconIconRecord, value))
+        .filter((record) => record !== null)
+        .sort((a, b) => a.lastAccessedAt - b.lastAccessedAt);
     });
   }
 
@@ -454,7 +459,10 @@ export class FirefoxFaviconCacheStorage {
         throw new FaviconError(FAVICON_ERROR_CODES.STALE_GENERATION);
       }
       const values = await requestResult(transaction.objectStore(SOURCES_STORE).getAll());
-      const records = values.map(parseFaviconIconRecord).sort((left, right) =>
+      // One damaged row must not fail the whole Storage gallery.
+      const records = values.map((value) => tryParse(parseFaviconIconRecord, value))
+        .filter((record) => record !== null)
+        .sort((left, right) =>
         left.origin.localeCompare(right.origin) ||
         left.partition.localeCompare(right.partition) ||
         left.sourceDigest.localeCompare(right.sourceDigest)
