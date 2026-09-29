@@ -113,6 +113,13 @@ export class WorkspacePackageService {
     const { icons: stored } = await this.#customIconService.listForExport();
     const storedIds = new Set(stored.map(({ id }) => id));
 
+    // A workspace whose custom icon can no longer be read is exported with
+    // the House fallback; the affected names are reported so the fallback
+    // is never silent.
+    const fallbackIconWorkspaces = state.workspaces
+      .filter(({ icon }) => isCustomIconReference(icon) && !storedIds.has(icon))
+      .map(({ name }) => name);
+
     // Built through the package parser first, so a produced zip and an
     // imported one are held to exactly one contract.
     const document = createWorkspacePackage({
@@ -178,7 +185,8 @@ export class WorkspacePackageService {
     return {
       document,
       bytes,
-      filename: workspacePackageExportFilename({ createdAt: document.createdAt })
+      filename: workspacePackageExportFilename({ createdAt: document.createdAt }),
+      fallbackIconWorkspaces
     };
   }
 

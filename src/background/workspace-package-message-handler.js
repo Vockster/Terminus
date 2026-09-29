@@ -43,13 +43,13 @@ export function createWorkspacePackageMessageHandler({ service, downloads, onImp
     if (message.type === WORKSPACE_PACKAGE_MESSAGE_TYPES.EXPORT) {
       if (!hasExactKeys(message, ["type"])) return invalidRequest();
       return respond(
-        service.export().then(async ({ bytes, filename }) => {
+        service.export().then(async ({ bytes, filename, fallbackIconWorkspaces }) => {
           const downloadId = await downloads.downloadBytes({
             bytes,
             mimeType: "application/zip",
             filename
           });
-          return { downloadId, filename };
+          return { downloadId, filename, fallbackIconWorkspaces };
         })
       );
     }

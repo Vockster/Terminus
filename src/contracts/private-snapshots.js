@@ -4,6 +4,7 @@ import {
   SNAPSHOT_ERROR_CODES,
   SnapshotError,
   digestPrivateSnapshotPayload,
+  digestStoredPrivateSnapshotPayload,
   parsePrivateSnapshotPayload,
   toPrivateSnapshotPayload,
   verifySnapshotRecord
@@ -130,7 +131,10 @@ export async function verifyPrivateDocument(value, expectedType = null) {
   if (expectedType && document.documentType !== expectedType) {
     throw invalidBackup("The selected file is not the requested private backup type.");
   }
-  if ((await digestPrivateSnapshotPayload(document.payload)) !== document.payloadDigest) {
+  // Early exports embed workspace schema 4 and were digested as stored;
+  // digestStoredPrivateSnapshotPayload hashes those bytes while the parsed
+  // document carries the lifted payload.
+  if ((await digestStoredPrivateSnapshotPayload(value.payload)) !== document.payloadDigest) {
     throw new SnapshotError(SNAPSHOT_ERROR_CODES.INTEGRITY_FAILED);
   }
   return document;

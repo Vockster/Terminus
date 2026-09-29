@@ -234,6 +234,7 @@ export class SnapshotRepository {
   listSettingsBackups() {
     return this.#enqueue(async () => {
       const records = [];
+      const damaged = [];
       for (const candidate of await this.#callStorage(() => this.#storage.listSettingsBackups())) {
         try {
           if (!SETTINGS_BACKUP_ID_PATTERN.test(candidate.id)) {
@@ -242,10 +243,14 @@ export class SnapshotRepository {
           const backup = await verifySettingsBackup(candidate.value);
           records.push(settingsBackupSummary(candidate.id, backup));
         } catch {
-          // Invalid settings records stay isolated and are omitted from the library.
+          // An unreadable backup is reported, not silently missing; only
+          // its stored key is exposed, and it is never restored or selected
+          // for automatic deletion.
+          damaged.push({ id: candidate.id, damaged: true });
         }
       }
-      return records.sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt));
+      records.sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt));
+      return [...records, ...damaged];
     });
   }
 
@@ -255,7 +260,8 @@ export class SnapshotRepository {
       if (value === undefined) {
         throw notFound();
       }
-      await verifySettingsBackup(value);
+      // No verification: a damaged backup must still be deletable by its
+      // exact stored key.
       await this.#callStorage(() => this.#storage.removeSettingsBackup(id));
       return { id };
     });
@@ -352,7 +358,18 @@ export class SnapshotRepository {
   readRestoreJournal() {
     return this.#enqueue(async () => {
       const value = await this.#callStorage(() => this.#storage.readRestoreJournal());
-      return value === undefined ? null : parseRestoreJournal(value);
+      if (value === undefined) return null;
+      try {
+        return parseRestoreJournal(value);
+      } catch {
+        // A journal this build cannot read (for example one left by a very
+        // old interrupted restore) must not block startup recovery forever:
+        // set it aside and report it instead of retrying every start.
+        await this.#callStorage(() => this.#storage.quarantineDocument("restore-journal", value));
+        await this.#callStorage(() => this.#storage.removeRestoreJournal());
+        this.#warnOnce({ kind: "corrupt-restore-journal" });
+        return null;
+      }
     });
   }
 
@@ -409,8 +426,21 @@ export class SnapshotRepository {
     if (this.#initialized) {
       return;
     }
-    let index = await this.#readIndex();
+    const warnings = [];
+    // An unreadable index must not take the whole library down: it is set
+    // aside and the index below is rebuilt from the stored records, which
+    // this initialization already re-indexes one by one.
+    let index;
     let changed = false;
+    const rawIndex = await this.#callStorage(() => this.#storage.readIndex());
+    try {
+      index = rawIndex === undefined ? createDefaultSnapshotIndex() : parseSnapshotIndex(rawIndex);
+    } catch {
+      await this.#callStorage(() => this.#storage.quarantineDocument("index", rawIndex));
+      warnings.push({ kind: "corrupt-index" });
+      index = createDefaultSnapshotIndex();
+      changed = true;
+    }
     for (const id of index.tombstones) {
       await this.#callStorage(() => this.#storage.removeRecord(id));
       changed = true;
@@ -419,7 +449,6 @@ export class SnapshotRepository {
       index.tombstones = [];
     }
 
-    const warnings = [];
     const legacyMaster = await this.#callStorage(() => this.#storage.readMaster());
     if (legacyMaster !== undefined) {
       try {
@@ -496,6 +525,13 @@ export class SnapshotRepository {
     if (changed) {
       await this.#writeIndex(index);
     }
+    // Warnings recorded before initialization (for example a quarantined
+    // restore journal) survive the rebuild of the initialization warnings.
+    for (const earlier of this.#warnings) {
+      if (!warnings.some((entry) => JSON.stringify(entry) === JSON.stringify(earlier))) {
+        warnings.push(earlier);
+      }
+    }
     this.#warnings = warnings;
     this.#initialized = true;
   }
@@ -541,11 +577,28 @@ export class SnapshotRepository {
     if (value === undefined) {
       return createDefaultSnapshotScheduleState();
     }
-    const parsed = migrateSnapshotScheduleState(value);
+    let parsed;
+    try {
+      parsed = migrateSnapshotScheduleState(value);
+    } catch {
+      // An unreadable schedule must not break listing, overviews or
+      // retention: set it aside, heal with defaults, and report once.
+      await this.#callStorage(() => this.#storage.quarantineDocument("schedule", value));
+      this.#warnOnce({ kind: "corrupt-schedule" });
+      const fallback = createDefaultSnapshotScheduleState();
+      await this.#callStorage(() => this.#storage.writeScheduleState(fallback));
+      return fallback;
+    }
     if (value.schemaVersion !== parsed.schemaVersion) {
       await this.#callStorage(() => this.#storage.writeScheduleState(parsed));
     }
     return parsed;
+  }
+
+  #warnOnce(warning) {
+    if (!this.#warnings.some(({ kind }) => kind === warning.kind)) {
+      this.#warnings.push(warning);
+    }
   }
 
   async #writeScheduleState(value) {

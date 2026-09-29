@@ -320,9 +320,11 @@ test("export replaces a dangling custom-icon reference so every package is asset
     })
   });
 
-  const { document } = await service.export();
+  const { document, fallbackIconWorkspaces } = await service.export();
   assert.equal(document.payload.workspaces.workspaces[0].icon, "house");
   assert.deepEqual(document.payload.icons, []);
+  // The substitution is reported by workspace name, never applied silently.
+  assert.deepEqual(fallbackIconWorkspaces, ["One"]);
 });
 
 test("export waits for a shared workspace-and-icon mutation and reads one coherent result", async () => {

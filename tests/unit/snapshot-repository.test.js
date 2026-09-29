@@ -20,10 +20,17 @@ function memoryStorage() {
   let settingsReport;
   const records = new Map();
   const settingsBackups = new Map();
+  const quarantined = new Map();
   return {
     records,
     settingsBackups,
+    quarantined,
     seedMaster(value) { master = structuredClone(value); },
+    seedIndex(value) { index = structuredClone(value); },
+    seedSchedule(value) { schedule = structuredClone(value); },
+    seedJournal(value) { journal = structuredClone(value); },
+    get journal() { return structuredClone(journal); },
+    get schedule() { return structuredClone(schedule); },
     storage: {
       async readIndex() { return structuredClone(index); },
       async writeIndex(value) { index = structuredClone(value); },
@@ -49,6 +56,7 @@ function memoryStorage() {
       async writeLastRestoreReport(value) { report = structuredClone(value); },
       async readLastSettingsRestoreReport() { return structuredClone(settingsReport); },
       async writeLastSettingsRestoreReport(value) { settingsReport = structuredClone(value); },
+      async quarantineDocument(name, value) { quarantined.set(name, structuredClone(value)); },
       async bytesInUse() { return 2048; }
     }
   };
@@ -252,4 +260,70 @@ test("clearing viewer history deliberately clears startup protection", async () 
     snapshotId: null,
     protectedAt: null
   });
+});
+
+test("an unreadable index is quarantined and the library rebuilds from stored records", async () => {
+  const memory = memoryStorage();
+  memory.seedIndex({ schemaVersion: 1, entries: "not-an-array" });
+  const repository = new SnapshotRepository(memory.storage);
+  await repository.save(await record("snapshot-kept", SNAPSHOT_KINDS.MANUAL, "2026-09-01T00:00:00.000Z"));
+
+  const { records, warnings } = await repository.list();
+
+  assert.deepEqual(records.map(({ id }) => id), ["snapshot-kept"]);
+  assert.ok(warnings.some(({ kind }) => kind === "corrupt-index"));
+  assert.ok(memory.quarantined.has("index"));
+});
+
+test("an unreadable schedule is quarantined and healed with defaults", async () => {
+  const memory = memoryStorage();
+  memory.seedSchedule({ schemaVersion: 3, startupProtection: "broken" });
+  const repository = new SnapshotRepository(memory.storage);
+
+  const { warnings } = await repository.list();
+  const schedule = await repository.readScheduleState();
+
+  assert.deepEqual(schedule.startupProtection, { snapshotId: null, protectedAt: null });
+  assert.ok(warnings.some(({ kind }) => kind === "corrupt-schedule"));
+  assert.ok(memory.quarantined.has("schedule"));
+  // The healed default was persisted, so later reads no longer warn.
+  assert.equal(memory.schedule.schemaVersion, schedule.schemaVersion);
+});
+
+test("an unreadable restore journal is quarantined instead of blocking recovery forever", async () => {
+  const memory = memoryStorage();
+  memory.seedJournal({ schemaVersion: 1, phase: "unknown-phase" });
+  const repository = new SnapshotRepository(memory.storage);
+
+  assert.equal(await repository.readRestoreJournal(), null);
+  assert.equal(memory.journal, undefined);
+  assert.ok(memory.quarantined.has("restore-journal"));
+  const { warnings } = await repository.list();
+  assert.ok(warnings.some(({ kind }) => kind === "corrupt-restore-journal"));
+});
+
+test("a damaged settings backup is listed and deletable, never restorable or pruned", async () => {
+  const memory = memoryStorage();
+  const repository = new SnapshotRepository(memory.storage);
+  await repository.saveSettingsBackup(
+    "settings-backup-good",
+    await finalizeSettingsBackup({
+      createdAt: "2026-09-01T00:00:00.000Z",
+      kind: SETTINGS_BACKUP_KINDS.AUTOMATIC,
+      settings: createDefaultSettingsState()
+    })
+  );
+  memory.settingsBackups.set("settings-backup-broken", { documentType: "sidebars.settings" });
+
+  const listed = await repository.listSettingsBackups();
+  assert.deepEqual(
+    listed.map(({ id, damaged }) => [id, damaged === true]),
+    [["settings-backup-good", false], ["settings-backup-broken", true]]
+  );
+  assert.equal(
+    await repository.latestAutomaticSettingsDigest(),
+    listed[0].payloadDigest
+  );
+  await repository.deleteSettingsBackup("settings-backup-broken");
+  assert.equal(memory.settingsBackups.has("settings-backup-broken"), false);
 });

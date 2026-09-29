@@ -1,4 +1,4 @@
-import { parseSettingsState } from "./settings-state.js";
+import { migrateSettingsStateToCurrent } from "./settings-state.js";
 import { parseWorkspaceRuntime } from "./workspace-runtime.js";
 import { parseWorkspaceState } from "./workspace-state.js";
 
@@ -34,7 +34,10 @@ function parseDocuments(value, label) {
     const workspaceState = parseWorkspaceState(value.workspaceState);
     const workspaceIds = workspaceState.workspaces.map(({ id }) => id);
     return {
-      settings: parseSettingsState(value.settings),
+      // A journal left by an older build embeds that build's settings
+      // version; lifting it keeps the interrupted restore recoverable
+      // instead of discarding it as unreadable.
+      settings: migrateSettingsStateToCurrent(value.settings),
       workspaceState,
       runtime: parseWorkspaceRuntime(value.runtime, workspaceIds)
     };

@@ -4,6 +4,7 @@ import {
   SNAPSHOT_INDEX_STORAGE_KEY,
   SNAPSHOT_LAST_RESTORE_REPORT_STORAGE_KEY,
   SNAPSHOT_MASTER_STORAGE_KEY,
+  SNAPSHOT_QUARANTINE_STORAGE_PREFIX,
   SNAPSHOT_RECORD_STORAGE_PREFIX,
   SNAPSHOT_RESTORE_JOURNAL_STORAGE_KEY,
   SNAPSHOT_SCHEDULE_STORAGE_KEY
@@ -27,6 +28,11 @@ export function createFirefoxSnapshotStorage(browserApi) {
   return Object.freeze({
     async readIndex() {
       return ownedValue(await storageArea.get(SNAPSHOT_INDEX_STORAGE_KEY), SNAPSHOT_INDEX_STORAGE_KEY);
+    },
+    // One retained copy per document name so an unreadable index, schedule
+    // or restore journal is preserved for inspection, not destroyed.
+    async quarantineDocument(name, value) {
+      await storageArea.set({ [`${SNAPSHOT_QUARANTINE_STORAGE_PREFIX}${name}`]: value });
     },
 
     async writeIndex(index) {

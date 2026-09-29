@@ -5,7 +5,12 @@ import {
   SETTINGS_TRANSFER_JOURNAL_STORAGE_KEY,
   parseSettingsTransferJournal
 } from "../../src/contracts/settings-transfer.js";
-import { createDefaultSettingsState, parseSettingsState } from "../../src/contracts/settings-state.js";
+import {
+  createDefaultSettingsState,
+  createDefaultSettingsStateV33,
+  migrateSettingsStateToCurrent,
+  parseSettingsState
+} from "../../src/contracts/settings-state.js";
 import {
   WORKSPACE_RUNTIME_SCHEMA_VERSION,
   parseWorkspaceRuntime
@@ -300,6 +305,39 @@ test("legacy journals are reported neutrally and newer live documents are kept",
   assert.equal(outcome.source, "legacy");
   assert.equal(outcome.documents.settings, "kept-newer");
   assert.equal(h.documents.settings.appearance.mode, "firefox");
+  assert.equal(h.journal, undefined);
+});
+
+test("an interrupted restore left by an older build rolls back instead of being discarded", async () => {
+  // The journal embeds the older build's settings version; the parser lifts
+  // it so the half-applied restore is undone, not retired as unreadable.
+  const beforeSettings = createDefaultSettingsStateV33();
+  const afterSettings = createDefaultSettingsStateV33();
+  afterSettings.sidebar.workspaceSize = "large";
+  const stateDocument = workspaceState();
+  const runtimeDocument = runtime(stateDocument);
+  const rawJournal = {
+    schemaVersion: 1,
+    revisionId: "revision-settings-backup-old",
+    phase: "applying",
+    before: { settings: beforeSettings, workspaceState: stateDocument, runtime: runtimeDocument },
+    after: { settings: afterSettings, workspaceState: stateDocument, runtime: runtimeDocument },
+    report: { workspaceDefinitionsChanged: false, removedWorkspaces: [], reassignedTabCount: 0 }
+  };
+  const h = harness({
+    initial: {
+      settings: migrateSettingsStateToCurrent(afterSettings),
+      workspaceState: stateDocument,
+      runtime: runtimeDocument
+    },
+    initialJournal: rawJournal
+  });
+
+  const outcome = await h.service.recover({ convergeWindows: async () => undefined });
+
+  assert.equal(outcome.unreadable, false);
+  assert.equal(outcome.documents.settings, "undone");
+  assert.deepEqual(h.documents.settings, migrateSettingsStateToCurrent(beforeSettings));
   assert.equal(h.journal, undefined);
 });
 

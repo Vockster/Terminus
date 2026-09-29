@@ -2911,6 +2911,60 @@ export function migrateSettingsStateV1(value) {
   )));
 }
 
+// Lifts a stored settings document of any shipped schema version to the
+// current one. Embedded copies, such as an interrupted settings-transfer
+// journal written by an older build, use this instead of the strict
+// current-version parser so they stay recoverable after an upgrade.
+export function migrateSettingsStateToCurrent(value) {
+  const version = value !== null && typeof value === "object" && !Array.isArray(value)
+    ? value.schemaVersion
+    : undefined;
+  if (version === SETTINGS_STATE_SCHEMA_VERSION) {
+    return parseSettingsState(value);
+  }
+  const migrateByVersion = {
+    1: migrateSettingsStateV1,
+    2: migrateSettingsStateV2,
+    3: migrateSettingsStateV3,
+    4: migrateSettingsStateV4,
+    5: migrateSettingsStateV5,
+    6: migrateSettingsStateV6,
+    7: migrateSettingsStateV7,
+    8: migrateSettingsStateV8,
+    9: migrateSettingsStateV9,
+    10: migrateSettingsStateV10,
+    11: migrateSettingsStateV11,
+    12: migrateSettingsStateV12,
+    13: migrateSettingsStateV13,
+    14: migrateSettingsStateV14,
+    15: migrateSettingsStateV15,
+    16: migrateSettingsStateV16,
+    17: migrateSettingsStateV17,
+    18: migrateSettingsStateV18,
+    19: migrateSettingsStateV19,
+    20: migrateSettingsStateV20,
+    21: migrateSettingsStateV21,
+    22: migrateSettingsStateV22,
+    23: migrateSettingsStateV23,
+    24: migrateSettingsStateV24,
+    25: migrateSettingsStateV25,
+    26: migrateSettingsStateV26,
+    27: migrateSettingsStateV27,
+    28: migrateSettingsStateV28,
+    29: migrateSettingsStateV29,
+    30: migrateSettingsStateV30,
+    31: migrateSettingsStateV31,
+    32: migrateSettingsStateV32,
+    33: migrateSettingsStateV33
+  };
+  const migrate = migrateByVersion[version];
+  if (!migrate) {
+    // The strict parser raises the accurate invalid/unsupported error.
+    return parseSettingsState(value);
+  }
+  return migrate(value);
+}
+
 export function parseSettingsPatch(value) {
   if (!isRecord(value) || !hasOnlyKeys(value, Object.values(SETTINGS_SECTIONS))) {
     throw invalidRequest("The update must contain a supported settings section.");

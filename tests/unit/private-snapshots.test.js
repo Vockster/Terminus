@@ -76,6 +76,31 @@ test("private snapshot and recovery documents are distinct, strict, and digest-b
   );
 });
 
+test("a private payload embedding workspace schema 4 is lifted instead of refused", () => {
+  // Early builds exported private documents whose embedded workspace state
+  // was still schema 4; the private document version never changed.
+  const payload = createSnapshotPayloadFixture({ containerAware: false });
+  payload.workspaceState = {
+    schemaVersion: 4,
+    workspaces: payload.workspaceState.workspaces.map(
+      ({ defaultContainerRef, ...workspace }) => workspace
+    ),
+    rail: payload.workspaceState.rail
+  };
+
+  const parsed = parsePrivateSnapshotPayload(payload);
+
+  assert.equal(parsed.workspaceState.schemaVersion, 5);
+  assert.deepEqual(
+    parsed.workspaceState.workspaces.map(({ id, defaultContainerRef }) => [id, defaultContainerRef]),
+    [["ws-source", null]]
+  );
+  assert.deepEqual(
+    parsed.windows[0].workspaceLayouts[0].tabs.map(({ id }) => id),
+    payload.windows[0].workspaceLayouts[0].tabs.map(({ id }) => id)
+  );
+});
+
 test("future private documents fail closed", async () => {
   const document = await createPrivateDocument({
     documentType: PRIVATE_SNAPSHOT_DOCUMENT_TYPE,

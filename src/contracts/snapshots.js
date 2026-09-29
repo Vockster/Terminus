@@ -83,6 +83,7 @@ import {
 } from "./settings-state.js";
 import { WORKSPACE_RUNTIME_SCHEMA_VERSION, parseWorkspaceRuntime } from "./workspace-runtime.js";
 import {
+  WORKSPACE_STATE_PREVIOUS_SCHEMA_VERSION,
   migrateWorkspaceStateV4,
   parseWorkspaceState,
   parseWorkspaceStateV4
@@ -134,6 +135,9 @@ export const SNAPSHOT_INDEX_STORAGE_KEY = "snapshotIndex";
 export const SNAPSHOT_RECORD_STORAGE_PREFIX = "snapshotRecord:";
 export const SNAPSHOT_SCHEDULE_STORAGE_KEY = "snapshotScheduleState";
 export const SNAPSHOT_RESTORE_JOURNAL_STORAGE_KEY = "snapshotRestoreJournal";
+// One slot per document name; an unreadable index, schedule or restore
+// journal is set aside here instead of breaking the whole library.
+export const SNAPSHOT_QUARANTINE_STORAGE_PREFIX = "snapshotQuarantine:";
 export const SNAPSHOT_LAST_RESTORE_REPORT_STORAGE_KEY = "snapshotLastRestoreReport";
 export const SETTINGS_BACKUP_LAST_RESTORE_REPORT_STORAGE_KEY = "settingsBackupLastRestoreReport";
 export const SETTINGS_BACKUP_RECORD_STORAGE_PREFIX = "settingsBackupRecord:";
@@ -618,7 +622,13 @@ export function parsePrivateSnapshotPayload(value) {
   if (!isRecord(value) || !hasExactKeys(value, ["workspaceState", "windows"])) {
     throw invalidBackup("The private snapshot payload has an invalid shape.");
   }
-  const workspaceState = parseWorkspaceState(value.workspaceState);
+  // Early builds exported private documents with workspace schema 4; the
+  // private document version never changed, so the embedded state is lifted
+  // here instead of refusing the whole file.
+  const workspaceState = isRecord(value.workspaceState) &&
+    value.workspaceState.schemaVersion === WORKSPACE_STATE_PREVIOUS_SCHEMA_VERSION
+    ? migrateWorkspaceStateV4(value.workspaceState)
+    : parseWorkspaceState(value.workspaceState);
   if (workspaceState.workspaces.some(({ defaultContainerRef }) => defaultContainerRef !== null)) {
     throw invalidBackup("Private snapshots cannot contain container defaults.");
   }
@@ -696,6 +706,23 @@ export async function digestSnapshotPayload(payload) {
 
 export async function digestPrivateSnapshotPayload(payload) {
   return digestJsonPayload(parsePrivateSnapshotPayload(payload));
+}
+
+// A private document written before workspace schema 5 digested the payload
+// exactly as it stored it. Verifying such a document must hash those stored
+// bytes, not the lifted copy parsing hands back, or every genuine old export
+// would fail its integrity check.
+export async function digestStoredPrivateSnapshotPayload(payload) {
+  if (
+    isRecord(payload) &&
+    isRecord(payload.workspaceState) &&
+    payload.workspaceState.schemaVersion === WORKSPACE_STATE_PREVIOUS_SCHEMA_VERSION
+  ) {
+    // Validation still runs; only the digest source stays as written.
+    parsePrivateSnapshotPayload(payload);
+    return digestJsonPayload(payload);
+  }
+  return digestPrivateSnapshotPayload(payload);
 }
 
 function migrateSnapshotPayloadV2(payload) {
