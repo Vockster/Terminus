@@ -1,0 +1,161 @@
+{
+  "documentType": "sidebars.snapshot",
+  "schemaVersion": 3,
+  "id": "snapshot-compat-v3",
+  "kind": "manual",
+  "createdAt": "2026-09-27T12:00:00.000Z",
+  "reason": null,
+  "payloadDigest": "e0fc4f91c1f9f8dc6515cac25dbf7ad78de7548439c3f7046951254e601aa363",
+  "payload": {
+    "workspaceState": {
+      "schemaVersion": 5,
+      "workspaces": [
+        {
+          "id": "ws-docs",
+          "name": "Docs",
+          "icon": "briefcase",
+          "color": "#336699",
+          "defaultContainerRef": "ctr-work"
+        },
+        {
+          "id": "ws-mail",
+          "name": "Mail",
+          "icon": "mail",
+          "color": "#993366",
+          "defaultContainerRef": null
+        }
+      ],
+      "rail": [
+        {
+          "kind": "workspace",
+          "workspaceId": "ws-docs"
+        },
+        {
+          "kind": "divider",
+          "id": "divider-main",
+          "size": 24
+        },
+        {
+          "kind": "workspace",
+          "workspaceId": "ws-mail"
+        },
+        {
+          "kind": "space",
+          "id": "space-tail"
+        }
+      ]
+    },
+    "windows": [
+      {
+        "id": "window-main",
+        "geometry": {
+          "left": 20,
+          "top": 30,
+          "width": 1280,
+          "height": 800,
+          "state": "normal"
+        },
+        "activeWorkspaceId": "ws-docs",
+        "selectedTabs": [
+          {
+            "workspaceId": "ws-docs",
+            "tabId": "tab-guide"
+          }
+        ],
+        "workspaceLayouts": [
+          {
+            "workspaceId": "ws-docs",
+            "tabs": [
+              {
+                "id": "tab-guide",
+                "url": "https://example.com/docs",
+                "title": "Docs guide",
+                "active": true,
+                "highlighted": true,
+                "discarded": false,
+                "container": {
+                  "kind": "container",
+                  "refId": "ctr-work"
+                }
+              },
+              {
+                "id": "tab-wiki",
+                "url": "https://example.org/wiki",
+                "title": "Wiki",
+                "active": false,
+                "highlighted": false,
+                "discarded": false,
+                "container": {
+                  "kind": "none"
+                }
+              },
+              {
+                "id": "tab-notes",
+                "url": "https://example.com/notes",
+                "title": "Notes",
+                "active": false,
+                "highlighted": false,
+                "discarded": true,
+                "container": {
+                  "kind": "none"
+                }
+              }
+            ],
+            "pinnedTabIds": [
+              "tab-guide"
+            ],
+            "groups": [
+              {
+                "id": "group-research",
+                "title": "Research",
+                "color": "blue",
+                "collapsed": false,
+                "tabIds": [
+                  "tab-wiki",
+                  "tab-notes"
+                ]
+              }
+            ],
+            "tree": [
+              {
+                "tabId": "tab-guide",
+                "parentTabId": null,
+                "collapsed": false
+              },
+              {
+                "tabId": "tab-wiki",
+                "parentTabId": null,
+                "collapsed": true
+              },
+              {
+                "tabId": "tab-notes",
+                "parentTabId": "tab-wiki",
+                "collapsed": false
+              }
+            ],
+            "splitViews": [
+              {
+                "id": "split-main",
+                "tabIds": [
+                  "tab-wiki",
+                  "tab-notes"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "containerCatalog": [
+      {
+        "refId": "ctr-work",
+        "descriptor": {
+          "name": "Work",
+          "color": "blue",
+          "icon": "briefcase",
+          "colorCode": "#37adff"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "documentType": "sidebars.settings",
+  "schemaVersion": 4,
+  "createdAt": "2026-09-27T12:00:00.000Z",
+  "payloadDigest": "379055493495466b7b7dfaf0bdc939e67496faa8c37d6e33e5718d1ca243bdfd",
+  "payload": {
+    "settings": {
+      "schemaVersion": 10,
+      "sidebar": {
+        "railSize": 48,
+        "iconSize": 30,
+        "dividerSize": 16,
+        "workspaceReorderingLocked": false,
+        "showActionButtons": true,
+        "warnBeforeWorkspaceRemoval": true
+      },
+      "appearance": {
+        "mode": "firefox",
+        "solidColor": "#1c1b22",
+        "gradient": {
+          "angle": 135,
+          "stops": [
+            {
+              "color": "#2563eb",
+              "position": 0
+            },
+            {
+              "color": "#7c3aed",
+              "position": 100
+            }
+          ]
+        },
+        "contentMode": "full",
+        "activeTabHighlight": {
+          "mode": "firefox",
+          "color": "#0060df"
+        }
+      },
+      "snapshots": {
+        "automaticEnabled": false,
+        "intervalValue": 15,
+        "intervalUnit": "minutes",
+        "deleteAutomaticEnabled": false,
+        "deleteAfterValue": 30,
+        "deleteAfterUnit": "days",
+        "retentionCount": 100,
+        "automaticDownloads": false,
+        "warnBeforeSnapshotDeletion": true
+      }
+    },
+    "workspaceState": {
+      "schemaVersion": 4,
+      "workspaces": [
+        {
+          "id": "ws-docs",
+          "name": "Docs",
+          "icon": "briefcase",
+          "color": "#336699"
+        },
+        {
+          "id": "ws-mail",
+          "name": "Mail",
+          "icon": "mail",
+          "color": "#993366"
+        }
+      ],
+      "rail": [
+        {
+          "kind": "workspace",
+          "workspaceId": "ws-docs"
+        },
+        {
+          "kind": "divider",
+          "id": "divider-main",
+          "size": 24
+        },
+        {
+          "kind": "workspace",
+          "workspaceId": "ws-mail"
+        },
+        {
+          "kind": "space",
+          "id": "space-tail"
+        }
+      ]
+    }
+  }
+}

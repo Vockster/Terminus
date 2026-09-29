@@ -1,0 +1,120 @@
+{
+  "documentType": "sidebars.settings",
+  "schemaVersion": 17,
+  "backupKind": "manual",
+  "reason": null,
+  "createdAt": "2026-09-27T12:00:00.000Z",
+  "payloadDigest": "bb9f581793e5bbdf886810e083b95205c21d58a98385319a965bfaef38bbe14a",
+  "payload": {
+    "settings": {
+      "sidebar": {
+        "workspaceSize": "medium",
+        "tabSize": "medium",
+        "dividerSize": 16,
+        "workspaceReorderingLocked": false,
+        "showActionButtons": true,
+        "warnBeforeWorkspaceRemoval": true
+      },
+      "appearance": {
+        "mode": "default",
+        "solidColor": "#2b2a33",
+        "gradient": {
+          "angle": 135,
+          "stops": [
+            {
+              "color": "#2563eb",
+              "position": 0
+            },
+            {
+              "color": "#7c3aed",
+              "position": 100
+            }
+          ]
+        },
+        "contentMode": "full",
+        "activeTabHighlight": {
+          "mode": "custom",
+          "color": "#ffffff"
+        },
+        "applyToSettings": false,
+        "settingsBackgroundColor": "#2b2a33",
+        "typography": {
+          "source": "system",
+          "fontFamily": "system-ui",
+          "fontAssetId": null,
+          "fontSize": 16
+        },
+        "workspaceGlowMode": "container"
+      },
+      "snapshots": {
+        "automaticEnabled": false,
+        "intervalValue": 15,
+        "intervalUnit": "minutes",
+        "deleteAutomaticEnabled": false,
+        "deleteAfterValue": 30,
+        "deleteAfterUnit": "days",
+        "retentionCount": 100,
+        "automaticDownloads": false,
+        "automaticSettingsBackupsEnabled": false,
+        "scheduleMode": "interval",
+        "exactTime": "09:00",
+        "exactDays": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "warnBeforeSnapshotDeletion": true
+      },
+      "navigation": {
+        "rememberLastPanel": true,
+        "lastPanel": "sidebar"
+      },
+      "privacy": {
+        "keepPrivateTabsBetweenSessions": false,
+        "automaticSnapshotsEnabled": false
+      }
+    },
+    "workspaceState": {
+      "schemaVersion": 5,
+      "workspaces": [
+        {
+          "id": "ws-docs",
+          "name": "Docs",
+          "icon": "briefcase",
+          "color": "#336699",
+          "defaultContainerRef": null
+        },
+        {
+          "id": "ws-mail",
+          "name": "Mail",
+          "icon": "mail",
+          "color": "#993366",
+          "defaultContainerRef": null
+        }
+      ],
+      "rail": [
+        {
+          "kind": "workspace",
+          "workspaceId": "ws-docs"
+        },
+        {
+          "kind": "divider",
+          "id": "divider-main",
+          "size": 24
+        },
+        {
+          "kind": "workspace",
+          "workspaceId": "ws-mail"
+        },
+        {
+          "kind": "space",
+          "id": "space-tail"
+        }
+      ]
+    },
+    "containerCatalog": [],
+    "fontAssets": []
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 2,
+  "tabs": [
+    {
+      "id": "tab-guide",
+      "workspaceId": "ws-docs"
+    },
+    {
+      "id": "tab-wiki",
+      "workspaceId": "ws-docs"
+    },
+    {
+      "id": "tab-notes",
+      "workspaceId": "ws-docs"
+    },
+    {
+      "id": "tab-inbox",
+      "workspaceId": "ws-mail"
+    }
+  ],
+  "windows": [
+    {
+      "id": "window-main",
+      "activeWorkspaceId": "ws-docs",
+      "selectedTabs": [
+        {
+          "workspaceId": "ws-docs",
+          "tabId": "tab-guide"
+        },
+        {
+          "workspaceId": "ws-mail",
+          "tabId": "tab-inbox"
+        }
+      ]
+    }
+  ]
+}

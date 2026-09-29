@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 5,
+  "tabs": [
+    {
+      "id": "tab-guide",
+      "workspaceId": "ws-docs"
+    },
+    {
+      "id": "tab-wiki",
+      "workspaceId": "ws-docs"
+    },
+    {
+      "id": "tab-notes",
+      "workspaceId": "ws-docs"
+    },
+    {
+      "id": "tab-inbox",
+      "workspaceId": "ws-mail"
+    }
+  ],
+  "windows": [
+    {
+      "id": "window-main",
+      "activeWorkspaceId": "ws-docs",
+      "selectedTabs": [
+        {
+          "workspaceId": "ws-docs",
+          "tabId": "tab-guide"
+        }
+      ],
+      "workspaceLayouts": [
+        {
+          "workspaceId": "ws-docs",
+          "tabIds": [
+            "tab-guide",
+            "tab-wiki",
+            "tab-notes"
+          ],
+          "pinnedTabIds": [
+            "tab-guide"
+          ],
+          "groups": [
+            {
+              "id": "group-research",
+              "title": "Research",
+              "color": "blue",
+              "collapsed": false,
+              "tabIds": [
+                "tab-wiki",
+                "tab-notes"
+              ]
+            }
+          ],
+          "tree": [
+            {
+              "tabId": "tab-guide",
+              "parentTabId": null,
+              "collapsed": false
+            },
+            {
+              "tabId": "tab-wiki",
+              "parentTabId": null,
+              "collapsed": false
+            },
+            {
+              "tabId": "tab-notes",
+              "parentTabId": "tab-wiki",
+              "collapsed": false
+            }
+          ],
+          "splitViews": [
+            {
+              "id": "split-main",
+              "tabIds": [
+                "tab-wiki",
+                "tab-notes"
+              ]
+            }
+          ]
+        },
+        {
+          "workspaceId": "ws-mail",
+          "tabIds": [
+            "tab-inbox"
+          ],
+          "pinnedTabIds": [],
+          "groups": [],
+          "tree": [
+            {
+              "tabId": "tab-inbox",
+              "parentTabId": null,
+              "collapsed": false
+            }
+          ],
+          "splitViews": []
+        }
+      ],
+      "pendingOperation": null
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 4,
+  "workspaces": [
+    {
+      "id": "ws-docs",
+      "name": "Docs",
+      "icon": "briefcase",
+      "color": "#336699"
+    },
+    {
+      "id": "ws-mail",
+      "name": "Mail",
+      "icon": "mail",
+      "color": "#993366"
+    }
+  ],
+  "rail": [
+    {
+      "kind": "workspace",
+      "workspaceId": "ws-docs"
+    },
+    {
+      "kind": "divider",
+      "id": "divider-main",
+      "size": 24
+    },
+    {
+      "kind": "workspace",
+      "workspaceId": "ws-mail"
+    },
+    {
+      "kind": "space",
+      "id": "space-tail"
+    }
+  ]
+}

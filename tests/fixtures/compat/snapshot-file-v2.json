@@ -1,0 +1,138 @@
+{
+  "documentType": "sidebars.snapshot",
+  "schemaVersion": 2,
+  "id": "snapshot-compat-v2",
+  "kind": "manual",
+  "createdAt": "2026-09-27T12:00:00.000Z",
+  "reason": null,
+  "payloadDigest": "37a8af9aaac520f23f835479b7ac6fafd1e38394fc7055fc1b41b077655997de",
+  "payload": {
+    "workspaceState": {
+      "schemaVersion": 4,
+      "workspaces": [
+        {
+          "id": "ws-docs",
+          "name": "Docs",
+          "icon": "briefcase",
+          "color": "#336699"
+        },
+        {
+          "id": "ws-mail",
+          "name": "Mail",
+          "icon": "mail",
+          "color": "#993366"
+        }
+      ],
+      "rail": [
+        {
+          "kind": "workspace",
+          "workspaceId": "ws-docs"
+        },
+        {
+          "kind": "divider",
+          "id": "divider-main",
+          "size": 24
+        },
+        {
+          "kind": "workspace",
+          "workspaceId": "ws-mail"
+        },
+        {
+          "kind": "space",
+          "id": "space-tail"
+        }
+      ]
+    },
+    "windows": [
+      {
+        "id": "window-main",
+        "geometry": {
+          "left": 20,
+          "top": 30,
+          "width": 1280,
+          "height": 800,
+          "state": "normal"
+        },
+        "activeWorkspaceId": "ws-docs",
+        "selectedTabs": [
+          {
+            "workspaceId": "ws-docs",
+            "tabId": "tab-guide"
+          }
+        ],
+        "workspaceLayouts": [
+          {
+            "workspaceId": "ws-docs",
+            "tabs": [
+              {
+                "id": "tab-guide",
+                "url": "https://example.com/docs",
+                "title": "Docs guide",
+                "active": true,
+                "highlighted": true,
+                "discarded": false
+              },
+              {
+                "id": "tab-wiki",
+                "url": "https://example.org/wiki",
+                "title": "Wiki",
+                "active": false,
+                "highlighted": false,
+                "discarded": false
+              },
+              {
+                "id": "tab-notes",
+                "url": "https://example.com/notes",
+                "title": "Notes",
+                "active": false,
+                "highlighted": false,
+                "discarded": true
+              }
+            ],
+            "pinnedTabIds": [
+              "tab-guide"
+            ],
+            "groups": [
+              {
+                "id": "group-research",
+                "title": "Research",
+                "color": "blue",
+                "collapsed": false,
+                "tabIds": [
+                  "tab-wiki",
+                  "tab-notes"
+                ]
+              }
+            ],
+            "tree": [
+              {
+                "tabId": "tab-guide",
+                "parentTabId": null,
+                "collapsed": false
+              },
+              {
+                "tabId": "tab-wiki",
+                "parentTabId": null,
+                "collapsed": true
+              },
+              {
+                "tabId": "tab-notes",
+                "parentTabId": "tab-wiki",
+                "collapsed": false
+              }
+            ],
+            "splitViews": [
+              {
+                "id": "split-main",
+                "tabIds": [
+                  "tab-wiki",
+                  "tab-notes"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

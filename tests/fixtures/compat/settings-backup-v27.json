@@ -1,0 +1,73 @@
+{
+  "documentType": "sidebars.settings",
+  "schemaVersion": 27,
+  "backupKind": "manual",
+  "reason": null,
+  "createdAt": "2026-09-27T12:00:00.000Z",
+  "payloadDigest": "eb3a2bedab539b7f702c16b1801888ccd4b09df2d90318b3f1ff5aaf5150540e",
+  "payload": {
+    "settings": {
+      "sidebar": {
+        "workspaceSize": "medium",
+        "tabSize": "medium",
+        "dividerSize": 16,
+        "workspaceReorderingLocked": false,
+        "showActionButtons": true,
+        "warnBeforeLoadingManyTabs": true,
+        "showAddWorkspaceButton": true,
+        "warnBeforeClosingMultipleTabs": true,
+        "hideUnloadedTabsFromFirefox": false,
+        "showTabSearch": true,
+        "tabSearchPosition": "top"
+      },
+      "appearance": {
+        "mode": "default",
+        "solidColor": "#2b2a33",
+        "gradient": {
+          "angle": 135,
+          "stops": [
+            {
+              "color": "#2563eb",
+              "position": 0
+            },
+            {
+              "color": "#7c3aed",
+              "position": 100
+            }
+          ]
+        },
+        "contentMode": "full",
+        "activeTabHighlight": {
+          "mode": "custom",
+          "color": "#ffffff"
+        },
+        "applyToSettings": false,
+        "settingsBackgroundColor": "#2b2a33",
+        "typography": {
+          "source": "system",
+          "fontFamily": "system-ui",
+          "fontSize": 20
+        },
+        "workspaceGlowMode": "container"
+      },
+      "snapshots": {
+        "automaticEnabled": false,
+        "intervalValue": 15,
+        "intervalUnit": "minutes",
+        "retentionCount": 100,
+        "automaticDownloads": false,
+        "automaticSettingsBackupsEnabled": false,
+        "warnBeforeSnapshotDeletion": true,
+        "restoreBatchSize": 10
+      },
+      "navigation": {
+        "rememberLastPanel": true,
+        "lastPanel": "sidebar"
+      },
+      "privacy": {
+        "keepPrivateTabsBetweenSessions": false,
+        "automaticSnapshotsEnabled": false
+      }
+    }
+  }
+}

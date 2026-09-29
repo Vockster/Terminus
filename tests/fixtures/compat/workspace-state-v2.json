@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 2,
+  "workspaces": [
+    {
+      "id": "ws-docs",
+      "name": "Docs",
+      "icon": "briefcase",
+      "color": "#336699"
+    },
+    {
+      "id": "ws-mail",
+      "name": "Mail",
+      "icon": "mail",
+      "color": "#993366"
+    }
+  ],
+  "rail": [
+    {
+      "kind": "workspace",
+      "workspaceId": "ws-docs"
+    },
+    {
+      "kind": "spacer",
+      "id": "spacer-gap"
+    },
+    {
+      "kind": "workspace",
+      "workspaceId": "ws-mail"
+    }
+  ]
+}
