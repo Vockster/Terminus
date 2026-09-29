@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-09-29
+
+### Fixed
+
+- Removing a workspace and taking snapshots work again when tabs are in
+  Firefox containers while Terminus's container support is off. The tab's
+  container is recorded either way; container support is only needed to
+  reopen tabs in their containers during a restore.
+- A window with an unfinished workspace operation no longer blocks workspace
+  removal and snapshots indefinitely. The safety snapshot captures the last
+  saved layout and the action continues.
+- When removal or a snapshot is refused, the message now names the actual
+  reason instead of "Workspace data could not be loaded." or "The snapshot
+  operation could not be completed."
+- Tab trees saved by 0.1.0 are no longer reshaped: a top-level tab is never
+  pulled inside another tab's branch and hidden there. In a branch an older
+  version left split, the later part becomes top-level instead.
+- A container that Firefox briefly fails to report no longer clears it as a
+  workspace's default container; it re-links when it returns.
+- Private snapshot files exported by early builds import again.
+- One damaged saved record no longer takes down more than itself: a damaged
+  snapshot list or schedule is set aside and rebuilt, a damaged settings
+  backup is shown as damaged instead of silently missing, a damaged website
+  icon no longer breaks the Storage gallery, and an interrupted settings
+  restore left by an older version is rolled back instead of discarded.
+- Exporting a workspace whose custom icon can no longer be read now says the
+  file uses the House icon for it instead of substituting silently.
+
 ## [0.1.2] - 2026-09-28
 
 ### Changed
